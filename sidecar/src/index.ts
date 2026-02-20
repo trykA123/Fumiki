@@ -53,7 +53,7 @@ app.get('*', (c) => {
     }
 });
 
-const port = parseInt(process.env.PORT || '11111', 10);
+const port = parseInt(process.env.PORT || '3000', 10);
 console.log(`🚀 Fumiki API serving on http://localhost:${port}`);
 
 export default {
