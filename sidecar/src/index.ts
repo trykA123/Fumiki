@@ -5,14 +5,24 @@ import { join } from 'node:path';
 import { readFileSync } from 'node:fs';
 
 // Database & Setup
+import { db } from './db/db';
 import { runMigrations } from './db/migrations';
 import { seedDatabase } from './db/seed';
 import { sessionMiddleware, type Env } from './middleware/session';
+
+// Routers
+import { authRoutes } from './routes/auth';
 
 // Initialize Database on Boot
 console.log('--- Starting Fumiki Sidecar ---')
 runMigrations();
 seedDatabase();
+
+// Bootstrap external config if provided in env
+if (process.env.ABS_URL) {
+    db.query('INSERT INTO server_config (key, value) VALUES (?, ?) ON CONFLICT(key) DO UPDATE SET value=excluded.value')
+        .run('ABS_URL', process.env.ABS_URL.replace(/\/$/, ''));
+}
 
 // Setup Hono Application
 const app = new Hono<Env>();
@@ -20,6 +30,7 @@ app.use('*', logger());
 app.use('/api/*', sessionMiddleware);
 
 // API Routes
+app.route('/api/auth', authRoutes);
 app.get('/api/health', (c) => {
     return c.json({ data: { status: 'ok' } });
 });

@@ -1,4 +1,9 @@
 <script lang="ts">
+    import type {
+        HTMLInputAttributes,
+        HTMLTextareaAttributes,
+    } from "svelte/elements";
+
     let {
         value = $bindable(""),
         type = "text",
@@ -6,14 +11,16 @@
         placeholder = "",
         disabled = false,
         class: className = "",
+        ...rest
     }: {
         value?: string;
         type?: "text" | "search" | "password" | "textarea";
-        size?: "sm" | "md" | "lg";
+        size?: "sm" | "md" | "lg" | undefined;
         placeholder?: string;
         disabled?: boolean;
         class?: string;
-    } = $props();
+    } & Omit<HTMLInputAttributes, "size" | "type"> &
+        Omit<HTMLTextareaAttributes, "size" | "type"> = $props();
 </script>
 
 {#if type === "textarea"}
@@ -22,6 +29,7 @@
         {placeholder}
         {disabled}
         class="input textarea input-{size} {className}"
+        {...rest}
     ></textarea>
 {:else}
     <input
@@ -30,6 +38,7 @@
         {placeholder}
         {disabled}
         class="input input-{type} input-{size} {className}"
+        {...rest}
     />
 {/if}
 
