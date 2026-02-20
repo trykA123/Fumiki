@@ -12,6 +12,7 @@ import { sessionMiddleware, type Env } from './middleware/session';
 
 // Routers
 import { authRoutes } from './routes/auth';
+import { absRoutes } from './routes/abs';
 
 // Initialize Database on Boot
 console.log('--- Starting Fumiki Sidecar ---')
@@ -31,6 +32,7 @@ app.use('/api/*', sessionMiddleware);
 
 // API Routes
 app.route('/api/auth', authRoutes);
+app.route('/api/abs', absRoutes);
 app.get('/api/health', (c) => {
     return c.json({ data: { status: 'ok' } });
 });
