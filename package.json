@@ -11,7 +11,7 @@
         "dev:sidecar": "bun run --hot sidecar/src/index.ts",
         "dev:client": "cd client && bun run dev",
         "dev": "concurrently \"bun run dev:sidecar\" \"bun run dev:client\"",
-        "build": "bun --cwd client run build",
+        "build": "cd client && bun run build",
         "start": "bun run sidecar/src/index.ts"
     },
     "devDependencies": {
