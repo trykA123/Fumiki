@@ -1,0 +1,13 @@
+services:
+  fumiki:
+    build: .
+    ports:
+      - "11111:11111"
+    volumes:
+      - fumiki-data:/app/data
+    environment:
+      - NODE_ENV=production
+    restart: unless-stopped
+
+volumes:
+  fumiki-data:
