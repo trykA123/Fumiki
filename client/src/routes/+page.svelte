@@ -1,217 +1,249 @@
 <script lang="ts">
-  import { themeId, theme } from "$stores/theme";
-  import Button from "$lib/components/ui/Button.svelte";
-  import Card from "$lib/components/ui/Card.svelte";
-  import Input from "$lib/components/ui/Input.svelte";
-  import ProgressBar from "$lib/components/ui/ProgressBar.svelte";
-  import Tag from "$lib/components/ui/Tag.svelte";
-  import Toast from "$lib/components/ui/Toast.svelte";
-  import Modal from "$lib/components/ui/Modal.svelte";
-  import SectionHeader from "$lib/components/ui/SectionHeader.svelte";
-  import Divider from "$lib/components/ui/Divider.svelte";
-  import Skeleton from "$lib/components/ui/Skeleton.svelte";
-  import EmptyState from "$lib/components/ui/EmptyState.svelte";
+  import { onMount } from "svelte";
+  import { library } from "$lib/stores/library";
+  import { progress } from "$lib/stores/progress";
+  import { auth } from "$lib/stores/auth";
 
-  let modalOpen = $state(false);
-  let showToast = $state(false);
+  import Greeting from "$lib/components/home/Greeting.svelte";
+  import SectionHeader from "$lib/components/home/SectionHeader.svelte";
+  import ActivityItem from "$lib/components/home/ActivityItem.svelte";
+  import BookCoverCard from "$lib/components/library/BookCoverCard.svelte";
+  import BookGrid from "$lib/components/ui/BookGrid.svelte";
+
+  // Derived states
+  let continueReading = $derived(
+    $library.books.filter((b) => b.progress > 0 && b.progress < 1).slice(0, 5),
+  );
+  let recentBooks = $derived(
+    [...$library.books].sort((a, b) => b.addedAt - a.addedAt).slice(0, 5),
+  );
+
+  onMount(async () => {
+    // Only fetch if empty to prevent unnecessary network calls on back navigation
+    if ($library.books.length === 0) {
+      library.loadLibraries();
+    }
+    progress.load();
+  });
 </script>
 
-<main class="page-container">
-  <h1>Core Components Test</h1>
-  <p class="subtitle">
-    Theme: <strong>{$theme?.nameKanji} {$theme?.name}</strong>
-  </p>
+<svelte:head>
+  <title>Home - Fumiki</title>
+</svelte:head>
 
-  <div class="actions">
-    <Button
-      variant={$themeId === "sumi" ? "primary" : "secondary"}
-      onclick={() => themeId.setTheme("sumi")}>Sumi</Button
-    >
-    <Button
-      variant={$themeId === "kami" ? "primary" : "secondary"}
-      onclick={() => themeId.setTheme("kami")}>Kami</Button
-    >
-    <Button
-      variant={$themeId === "mori" ? "primary" : "secondary"}
-      onclick={() => themeId.setTheme("mori")}>Mori</Button
-    >
-  </div>
+<main class="home-page">
+  <Greeting
+    userName={$auth.username || undefined}
+    currentTitle={$progress.title}
+    kp={$progress.kp}
+  />
 
-  <Divider />
-
-  <SectionHeader title="Buttons" href="#" linkText="View All" />
-  <div class="component-grid">
-    <Button variant="primary">Primary</Button>
-    <Button variant="secondary">Secondary</Button>
-    <Button variant="ghost">Ghost</Button>
-    <Button variant="danger">Danger</Button>
-    <Button variant="icon">X</Button>
-  </div>
-
-  <Divider />
-
-  <SectionHeader title="Badges / Tags" />
-  <div class="component-grid">
-    <Tag intent="accent">Accent</Tag>
-    <Tag intent="success">Success</Tag>
-    <Tag intent="info">Info</Tag>
-    <Tag intent="muted">Muted</Tag>
-  </div>
-
-  <Divider />
-
-  <SectionHeader title="Inputs" />
-  <div class="component-col">
-    <Input type="text" placeholder="Standard input..." />
-    <Input type="search" placeholder="Search library..." />
-    <Input type="textarea" placeholder="A long note about a book..." />
-  </div>
-
-  <Divider />
-
-  <SectionHeader title="Cards & Structure" />
-  <div class="component-grid">
-    <Card variant="default"
-      >Base Card<br /><span style="color:var(--text-muted)">Un-clickable</span
-      ></Card
-    >
-    <Card variant="interactive"
-      >Interactive Card<br /><span style="color:var(--text-muted)"
-        >Hover me</span
-      ></Card
-    >
-    <Card variant="elevated"
-      >Elevated Card<br /><span style="color:var(--text-muted)"
-        >Stronger shadow</span
-      ></Card
-    >
-    <Card variant="hero"
-      >Hero Card<br /><span style="color:var(--text-muted)">Has ornaments</span
-      ></Card
-    >
-  </div>
-
-  <Divider />
-
-  <SectionHeader title="Progress & Skeletons" />
-  <div class="component-col">
-    <ProgressBar value={45} max={100} intent="accent" />
-    <ProgressBar value={100} max={100} intent="success" />
-
-    <div style="display:flex; gap:16px; margin-top:20px;">
-      <div style="width: 80px;"><Skeleton variant="cover" /></div>
-      <div style="flex:1;">
-        <Skeleton variant="text" /><br /><Skeleton
-          variant="text"
-          style="width: 60%"
-        />
-      </div>
+  {#if $library.loading && $library.books.length === 0}
+    <div class="loading-state">
+      <div class="spinner"></div>
+      <p>Syncing library...</p>
     </div>
-  </div>
+  {:else}
+    {#if continueReading.length > 0}
+      <section class="home-section scroll-section">
+        <SectionHeader title="Continue Reading" icon="play" />
+        <div class="horizontal-scroll">
+          <div class="scroll-track">
+            {#each continueReading as book (book.id)}
+              <div class="scroll-item">
+                <BookCoverCard {book} />
+              </div>
+            {/each}
+          </div>
+        </div>
+      </section>
+    {/if}
 
-  <Divider />
+    <div class="split-layout">
+      <section class="home-section master-section">
+        <SectionHeader
+          title="Recent Library"
+          icon="library"
+          actionText="View All"
+          onAction={() => (window.location.href = "/library")}
+        />
 
-  <SectionHeader title="Overlays & Fallbacks" />
-  <div class="component-grid">
-    <Button variant="secondary" onclick={() => (modalOpen = true)}
-      >Open Modal</Button
-    >
-    <Button variant="secondary" onclick={() => (showToast = true)}
-      >Trigger Toast</Button
-    >
-  </div>
+        {#if recentBooks.length > 0}
+          <BookGrid>
+            {#each recentBooks as book (book.id)}
+              <BookCoverCard {book} />
+            {/each}
+          </BookGrid>
+        {:else}
+          <p class="empty-text">No books found in your library.</p>
+        {/if}
+      </section>
 
-  <div style="margin-top: 2rem;">
-    <EmptyState
-      title="Start your library"
-      message="Looks like you haven't connected ABS yet."
-    >
-      {#snippet action()}
-        <Button variant="primary">Connect API</Button>
-      {/snippet}
-    </EmptyState>
-  </div>
+      <section class="home-section detail-section">
+        <SectionHeader title="Activity" icon="list" />
 
-  <Modal bind:open={modalOpen} title="Information">
-    <p>
-      This is a native HTML5 dialog element styled to perfection. It supports
-      accessibility natively and handles its own backdrop via CSS.
-    </p>
-    {#snippet actions()}
-      <Button variant="ghost" onclick={() => (modalOpen = false)}>Close</Button>
-      <Button variant="primary">Accept</Button>
-    {/snippet}
-  </Modal>
-
-  {#if showToast}
-    <div style="position: fixed; bottom: 20px; right: 20px; z-index: 9999;">
-      <Toast
-        intent="success"
-        message="File saved successfully!"
-        onclose={() => (showToast = false)}
-      />
+        <div class="activity-list">
+          {#if $progress.loading}
+            <div class="skeleton-activity"></div>
+            <div class="skeleton-activity"></div>
+            <div class="skeleton-activity"></div>
+          {:else}
+            <!-- Hardcoded placeholders for Phase 3: Knowledge Layer -->
+            <ActivityItem
+              points={42}
+              title="Dune - Chapter 4"
+              timeAgo="15m ago"
+            />
+            <ActivityItem
+              points={89}
+              title="Atomic Habits - Chapter 1"
+              timeAgo="2h ago"
+            />
+            <ActivityItem
+              points={15}
+              title="Project Hail Mary"
+              timeAgo="Yesterday"
+            />
+            <ActivityItem
+              points={120}
+              title="The Psychology of Money"
+              timeAgo="2 days ago"
+            />
+          {/if}
+        </div>
+      </section>
     </div>
   {/if}
 </main>
 
 <style>
-  .page-container {
-    max-width: var(--content-max-width, 800px);
-    margin: 0 auto;
-    padding: var(--page-padding-desktop);
+  .home-page {
+    padding: 0 var(--page-padding-mobile)
+      calc(var(--bottom-nav-height) + var(--space-8));
+    max-width: var(--page-max-width, 1400px);
+    margin: 0 var(--space-3);
   }
 
-  h1 {
-    font-family: var(--font-display);
-    font-size: var(--heading-hero-size);
-    font-weight: var(--heading-hero-weight);
-    margin-bottom: var(--space-2);
+  /* Tablet and Desktop padding adjustments container query */
+  @media (min-width: 768px) {
+    .home-page {
+      padding: 0 var(--page-padding-tablet) var(--space-12);
+    }
   }
 
-  .subtitle {
-    color: var(--text-secondary);
-    margin-bottom: var(--space-8);
+  .home-section {
+    margin-bottom: var(--space-10);
   }
 
-  /* The original .test-card and h2 styles are removed as they are not used in the new content */
+  .horizontal-scroll {
+    margin: 0 calc(var(--page-padding-mobile) * -1); /* Full bleed on mobile */
+    padding: 0 var(--page-padding-mobile);
+    overflow-x: auto;
+    overscroll-behavior-x: contain;
+    scrollbar-width: none; /* Firefox */
+  }
 
-  .actions {
+  .horizontal-scroll::-webkit-scrollbar {
+    display: none; /* Chrome/Safari */
+  }
+
+  .scroll-track {
     display: flex;
-    gap: var(--space-3);
-    margin-bottom: var(--space-8); /* Changed from margin-top */
-  }
-
-  button {
-    /* Original button styles, but now applied to the new Button component */
-    background-color: var(--surface-2);
-    color: var(--text-primary);
-    border: 1px solid var(--border-medium);
-    border-radius: var(--radius-sm);
-    padding: var(--space-3) var(--space-5);
-    font-size: var(--data-size);
-    cursor: pointer;
-    transition: all var(--animate-duration-fast);
-  }
-
-  button:hover {
-    background-color: var(--surface-3);
-  }
-
-  button.active {
-    background-color: var(--accent);
-    color: var(--accent-text, #fff);
-    border-color: var(--accent);
-  }
-
-  .component-grid {
-    display: flex;
-    flex-wrap: wrap;
     gap: var(--space-4);
+    padding-bottom: var(--space-4);
   }
 
-  .component-col {
+  .scroll-item {
+    flex: 0 0 140px; /* Fixed width for horizontal scrolling cards */
+  }
+
+  @media (min-width: 640px) {
+    .scroll-item {
+      flex: 0 0 160px;
+    }
+  }
+
+  .split-layout {
     display: flex;
     flex-direction: column;
-    gap: var(--space-4);
+    gap: var(--space-8);
+  }
+
+  @media (min-width: 1024px) {
+    .split-layout {
+      flex-direction: row;
+      align-items: flex-start;
+    }
+
+    .master-section {
+      flex: 1;
+      min-width: 0; /* Prevent flex overflow */
+      margin-bottom: 0;
+    }
+
+    .detail-section {
+      width: 320px;
+      flex-shrink: 0;
+      position: sticky;
+      top: calc(var(--top-nav-height) + var(--space-8));
+      margin-bottom: 0;
+    }
+  }
+
+  .activity-list {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-2);
+  }
+
+  .loading-state {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: var(--space-16) 0;
+    color: var(--text-muted);
+  }
+
+  .spinner {
+    width: 32px;
+    height: 32px;
+    border: 2px solid var(--surface-2);
+    border-top-color: var(--accent);
+    border-radius: var(--radius-full);
+    animation: spin 1s linear infinite;
+    margin-bottom: var(--space-4);
+  }
+
+  @keyframes spin {
+    to {
+      transform: rotate(360deg);
+    }
+  }
+
+  .skeleton-activity {
+    height: 64px;
+    background: var(--surface-2);
+    border-radius: var(--radius-md);
+    animation: pulse 2s infinite;
+  }
+
+  @keyframes pulse {
+    0%,
+    100% {
+      opacity: 1;
+    }
+    50% {
+      opacity: 0.5;
+    }
+  }
+
+  .empty-text {
+    color: var(--text-muted);
+    text-align: center;
+    padding: var(--space-12) 0;
+    background: var(--surface-1);
+    border-radius: var(--radius-lg);
+    font-size: var(--text-sm);
   }
 </style>

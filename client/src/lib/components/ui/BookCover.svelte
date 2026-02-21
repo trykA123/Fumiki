@@ -82,10 +82,10 @@
     }
     .size-md {
         width: 100%;
-        max-width: 140px;
+        /* max-width: 140px; */
     }
     .size-lg {
-        width: 180px;
+        width: 100%;
     }
 
     img {

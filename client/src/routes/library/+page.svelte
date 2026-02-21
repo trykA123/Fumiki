@@ -1,7 +1,6 @@
 <script lang="ts">
     import { onMount } from "svelte";
     import { library } from "$lib/stores/library";
-    import SectionHeader from "$lib/components/ui/SectionHeader.svelte";
     import SearchInput from "$lib/components/ui/SearchInput.svelte";
     import FilterPills from "$lib/components/ui/FilterPills.svelte";
     import BookGrid from "$lib/components/ui/BookGrid.svelte";
@@ -33,8 +32,6 @@
 
 <div class="library-page">
     <div class="header-area">
-        <SectionHeader title="Library" />
-
         <div class="controls-row">
             <SearchInput
                 placeholder="Search by title or author..."
@@ -98,8 +95,7 @@
 
 <style>
     .library-page {
-        padding: var(--space-4) var(--space-4) 120px var(--space-4);
-        max-width: 1400px;
+        max-width: var(--page-max-width, 1400px);
         margin: 0 auto;
         min-height: 100vh;
         display: flex;
@@ -115,7 +111,7 @@
         top: 0;
         z-index: 40;
         background: var(--background);
-        padding-top: var(--space-4);
+        padding: var(--space-4);
         margin-top: calc(var(--space-4) * -1);
         padding-bottom: var(--space-2);
 
@@ -129,6 +125,7 @@
         display: flex;
         flex-direction: column;
         gap: var(--space-4);
+        width: 100%;
     }
 
     :global(.search-bar) {
@@ -140,6 +137,7 @@
         position: relative;
         flex-grow: 1;
         transition: opacity 0.2s ease;
+        padding: var(--space-4) var(--page-padding-mobile);
     }
 
     .grid-container.loading {
@@ -215,8 +213,7 @@
     /* Tablet and Desktop Layout adjustments */
     @media (min-width: 768px) {
         .library-page {
-            padding: var(--space-8);
-            padding-bottom: 120px;
+            padding: var(--space-8) var(--page-padding-tablet) 120px;
         }
 
         .header-area {

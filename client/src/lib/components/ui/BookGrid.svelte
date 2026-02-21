@@ -12,18 +12,20 @@
 </div>
 
 <style>
+    /* BookGrid Styles */
     .book-grid {
         display: grid;
-        grid-template-columns: repeat(2, 1fr);
+        grid-template-columns: repeat(auto-fill, minmax(130px, 1fr));
         gap: var(--space-4);
         width: 100%;
+        grid-auto-rows: min-content;
     }
 
     /* Responsive Breakpoints */
     /* Phone Large */
     @media (min-width: 480px) {
         .book-grid {
-            grid-template-columns: repeat(3, 1fr);
+            grid-template-columns: repeat(minmax(140px, 1fr));
         }
     }
 

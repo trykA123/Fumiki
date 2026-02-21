@@ -1,6 +1,5 @@
 import { goto } from '$app/navigation';
-// Toasts will be implemented later, so we use a console fallback for now
-const toast = { error: (msg: string) => console.error(msg) };
+import { toast } from '$lib/stores/toast';
 
 const BASE = '/api';
 
@@ -18,15 +17,22 @@ class ApiClient {
     path: string,
     options: RequestInit = {}
   ): Promise<T> {
-    const res = await fetch(`${BASE}${path}`, {
-      ...options,
-      headers: {
-        'Content-Type': 'application/json',
-        ...options.headers,
-      },
-      // Include session cookie automatically
-      credentials: 'include',
-    });
+    let res: Response;
+    try {
+      res = await fetch(`${BASE}${path}`, {
+        ...options,
+        headers: {
+          'Content-Type': 'application/json',
+          ...options.headers,
+        },
+        // Include session cookie automatically
+        credentials: 'include',
+      });
+    } catch (e) {
+      // Network layer failure (e.g. server down, offline)
+      toast.add('Network offline. Please check your connection.', 'error', 0);
+      throw new Error('Network Error');
+    }
 
     if (res.status === 401 && !path.startsWith('/auth/')) {
       // Only trigger auth redirects for protected routes
@@ -42,9 +48,9 @@ class ApiClient {
       } catch { }
 
       if (res.status === 502) {
-        toast.error('Could not reach AudioBookShelf');
+        toast.add('Could not reach AudioBookShelf', 'error');
       } else if (res.status === 503) {
-        toast.error('Service unavailable');
+        toast.add('Service unavailable', 'error');
       }
 
       throw new Error(errStr);

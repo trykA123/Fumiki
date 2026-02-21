@@ -19,7 +19,17 @@ export const sessionMiddleware = createMiddleware<Env>(async (c, next) => {
     const token = getCookie(c, 'fumiki_session');
     let user: UserContext | null = null;
 
-    if (token) {
+    const config = db.query('SELECT value FROM server_config WHERE key = ?').get('ABS_URL') as { value: string } | undefined;
+    const absUrl = process.env.ABS_URL || (config?.value);
+
+    if (process.env.ABS_TOKEN && absUrl) {
+        user = {
+            id: 'env-override',
+            abs_user_id: 'api-user',
+            username: 'api-user',
+            token: process.env.ABS_TOKEN
+        };
+    } else if (token) {
         const row = db.query(`
             SELECT c.id, c.abs_user_id, c.username, c.token
             FROM sessions s

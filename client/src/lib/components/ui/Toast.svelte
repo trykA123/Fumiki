@@ -1,49 +1,31 @@
 <script lang="ts">
-    import { onMount } from "svelte";
+    import { toast } from "$lib/stores/toast";
 
     let {
+        id,
         intent = "info",
         message,
         duration = 4000,
-        onclose,
         class: className = "",
     }: {
+        id: string;
         intent?: "info" | "success" | "error" | "warning";
         message: string;
         duration?: number;
-        onclose?: () => void;
         class?: string;
     } = $props();
 
-    let visible = $state(true);
-
-    onMount(() => {
-        if (duration > 0) {
-            setTimeout(() => {
-                visible = false;
-                setTimeout(() => {
-                    if (onclose) onclose();
-                }, 300);
-            }, duration);
-        }
-    });
-
     function dismiss() {
-        visible = false;
-        setTimeout(() => {
-            if (onclose) onclose();
-        }, 300);
+        toast.remove(id);
     }
 </script>
 
-{#if visible}
-    <div class="toast toast-{intent} {className}" role="alert">
-        <span>{message}</span>
-        <button onclick={dismiss} class="close-btn" aria-label="Close message"
-            >×</button
-        >
-    </div>
-{/if}
+<div class="toast toast-{intent} {className}" role="alert">
+    <span>{message}</span>
+    <button onclick={dismiss} class="close-btn" aria-label="Close message"
+        >×</button
+    >
+</div>
 
 <style>
     .toast {

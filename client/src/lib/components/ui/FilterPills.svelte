@@ -70,9 +70,9 @@
     }
 
     .pill.active {
-        background: var(--text-base);
-        color: var(--surface-0);
-        border-color: transparent;
+        background: var(--surface-0);
+        color: var(--text-base);
+        border-color: var(--accent-border);
         font-weight: 500;
         box-shadow: 0 2px 8px var(--shadow-color);
     }

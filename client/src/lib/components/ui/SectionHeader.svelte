@@ -24,7 +24,8 @@
         display: flex;
         align-items: baseline;
         justify-content: space-between;
-        margin-bottom: var(--space-4);
+        padding-bottom: var(--space-2);
+        border-bottom: 1px dashed var(--border-medium);
     }
 
     .section-title {

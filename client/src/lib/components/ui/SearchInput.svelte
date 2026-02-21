@@ -28,7 +28,9 @@
 </script>
 
 <div class="search-container {className}">
-    <Icon name="search" size={18} class="search-icon" />
+    <div class="search-icon">
+        <Icon name="search" size={18} />
+    </div>
     <input
         type="search"
         {value}
@@ -52,6 +54,9 @@
         left: 12px;
         color: var(--text-muted);
         pointer-events: none;
+        display: flex;
+        align-items: center;
+        justify-content: center;
     }
 
     .search-input {
