@@ -38,7 +38,7 @@ notesRoutes.get('/export/:bookId', async (c) => {
         const notes = db.query(`
             SELECT n.*, b.title as bookTitle, b.author as bookAuthor
             FROM notes n 
-            LEFT JOIN book_cache b ON n.book_id = b.id 
+            LEFT JOIN book_cache b ON n.book_id = b.book_id
             WHERE n.connection_id = ? AND n.book_id = ?
             ORDER BY n.created_at ASC
         `).all(user.id, bookId) as NoteRow[];
@@ -112,7 +112,7 @@ notesRoutes.get('/', async (c) => {
         let query = `
             SELECT n.*, b.title as bookTitle 
             FROM notes n 
-            LEFT JOIN book_cache b ON n.book_id = b.id 
+            LEFT JOIN book_cache b ON n.book_id = b.book_id
             WHERE n.connection_id = ?
         `;
         const params: (string | number)[] = [user.id];
@@ -178,7 +178,7 @@ notesRoutes.get('/:bookId', async (c) => {
         let query = `
             SELECT n.*, b.title as bookTitle 
             FROM notes n 
-            LEFT JOIN book_cache b ON n.book_id = b.id 
+            LEFT JOIN book_cache b ON n.book_id = b.book_id
             WHERE n.connection_id = ? AND n.book_id = ?
         `;
         const params: (string | number)[] = [user.id, bookId];

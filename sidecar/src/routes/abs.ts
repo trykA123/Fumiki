@@ -98,9 +98,9 @@ absRoutes.get('/items/:id', async (c) => {
         // Cache the metadata lookup asynchronously
         try {
             db.prepare(`
-                INSERT INTO book_cache (id, title, author, cover_url, type, progress) 
+                INSERT INTO book_cache (book_id, title, author, cover_url, type, progress)
                 VALUES (?, ?, ?, ?, ?, ?)
-                ON CONFLICT(id) DO UPDATE SET 
+                ON CONFLICT(book_id) DO UPDATE SET
                     title=excluded.title, author=excluded.author, 
                     cover_url=excluded.cover_url, progress=excluded.progress
             `).run(
@@ -215,7 +215,7 @@ absRoutes.patch('/items/:id/progress', async (c) => {
         // Asynchronously update the local cache
         if (body.progress !== undefined) {
             try {
-                db.prepare('UPDATE book_cache SET progress = ? WHERE id = ?').run(body.progress, id);
+                db.prepare('UPDATE book_cache SET progress = ? WHERE book_id = ?').run(body.progress, id);
             } catch (e) {
                 // ignore
             }

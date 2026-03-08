@@ -103,8 +103,8 @@ summaryRoutes.post('/generate', zValidator('json', generateSchema), async (c) =>
         // Check Cache unless forced
         if (!forceRefresh) {
             const cached = db.query(`
-                SELECT * FROM ai_summaries 
-                WHERE book_id = ? AND prompt_type = ? 
+                SELECT * FROM summaries
+                WHERE book_id = ? AND prompt_type = ?
                 ORDER BY created_at DESC LIMIT 1
             `).get(bookId, promptType) as AISummaryRow | null;
 
@@ -158,7 +158,7 @@ Genres: ${bookData.media?.metadata?.genres?.join(', ') || 'N/A'}
 
         // Save to DB
         const stmt = db.prepare(`
-            INSERT INTO ai_summaries (book_id, provider, prompt_type, content)
+            INSERT INTO summaries (book_id, provider, prompt_type, content)
             VALUES (?, ?, ?, ?)
             RETURNING *
         `);
