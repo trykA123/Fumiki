@@ -1,6 +1,6 @@
-# GEMINI.md
+# CLAUDE.md
 
-> Antigravity IDE and Gemini CLI read this file automatically.
+> Claude Code reads this file automatically at the start of every session.
 
 ## Project
 
@@ -50,4 +50,4 @@ docs/
 
 ## Current Phase
 
-Phase 0 — Foundation. See `docs/phases/PHASE_0.md` for the task list.
+Phase 2 — Knowledge Layer (notes, highlights, AI summaries). See `docs/phases/PHASE_2.md` for the task list.
