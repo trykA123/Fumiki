@@ -5,6 +5,7 @@ import { z } from 'zod';
 import { zValidator } from '@hono/zod-validator';
 import { createProvider } from '../services/ai/provider';
 import type { AIProviderConfig } from '../services/ai/provider';
+import type { AISummaryRow, ABSItem } from '../../../shared/types';
 
 export const summaryRoutes = new Hono<Env>();
 
@@ -45,8 +46,8 @@ summaryRoutes.get('/settings', async (c) => {
         }
 
         return c.json({ data: safeSettings });
-    } catch (err: any) {
-        return c.json({ error: err.message }, 500);
+    } catch (err: unknown) {
+        return c.json({ error: err instanceof Error ? err.message : 'Internal server error' }, 500);
     }
 });
 
@@ -83,8 +84,8 @@ summaryRoutes.post('/settings', zValidator('json', settingsSchema), async (c) =>
         if (safeSettings.apiKey) safeSettings.apiKey = '********';
 
         return c.json({ data: safeSettings });
-    } catch (err: any) {
-        return c.json({ error: err.message }, 500);
+    } catch (err: unknown) {
+        return c.json({ error: err instanceof Error ? err.message : 'Internal server error' }, 500);
     }
 });
 
@@ -105,7 +106,7 @@ summaryRoutes.post('/generate', zValidator('json', generateSchema), async (c) =>
                 SELECT * FROM ai_summaries 
                 WHERE book_id = ? AND prompt_type = ? 
                 ORDER BY created_at DESC LIMIT 1
-            `).get(bookId, promptType) as any;
+            `).get(bookId, promptType) as AISummaryRow | null;
 
             if (cached) {
                 return c.json({
@@ -142,7 +143,7 @@ summaryRoutes.post('/generate', zValidator('json', generateSchema), async (c) =>
         });
 
         if (!absRes.ok) return c.json({ error: 'Failed to fetch book metadata' }, 500);
-        const bookData = await absRes.json();
+        const bookData = await absRes.json() as ABSItem;
 
         // Assemble context. We pass the title, author, description, genres.
         const contextText = `
@@ -162,7 +163,7 @@ Genres: ${bookData.media?.metadata?.genres?.join(', ') || 'N/A'}
             RETURNING *
         `);
 
-        const result: any = stmt.get(bookId, config.provider, promptType, generatedText);
+        const result = stmt.get(bookId, config.provider, promptType, generatedText) as AISummaryRow;
 
         return c.json({
             data: {
@@ -176,7 +177,7 @@ Genres: ${bookData.media?.metadata?.genres?.join(', ') || 'N/A'}
             }
         });
 
-    } catch (err: any) {
-        return c.json({ error: err.message || 'Failed to generate summary' }, 500);
+    } catch (err: unknown) {
+        return c.json({ error: err instanceof Error ? err.message : 'Failed to generate summary' }, 500);
     }
 });

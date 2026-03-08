@@ -48,8 +48,8 @@ function createNotesStore() {
                     totalNotes: result.total,
                     loading: false
                 }));
-            } catch (err: any) {
-                update(s => ({ ...s, loading: false, error: err.message }));
+            } catch (err: unknown) {
+                update(s => ({ ...s, loading: false, error: err instanceof Error ? err.message : String(err) }));
             }
         },
 
@@ -63,8 +63,8 @@ function createNotesStore() {
                     bookCache: { ...s.bookCache, [bookId]: result.data },
                     loading: false
                 }));
-            } catch (err: any) {
-                update(s => ({ ...s, loading: false, error: err.message }));
+            } catch (err: unknown) {
+                update(s => ({ ...s, loading: false, error: err instanceof Error ? err.message : String(err) }));
             }
         },
 
@@ -73,7 +73,7 @@ function createNotesStore() {
             bookId: string,
             type: Note['type'],
             positionType: Note['positionType'],
-            positionValue: Record<string, any>,
+            positionValue: Record<string, unknown>,
             content?: string | null,
             color?: string | null
         ) {
@@ -122,7 +122,7 @@ function createNotesStore() {
                 });
 
                 return result.data;
-            } catch (err: any) {
+            } catch (err: unknown) {
                 // Rollback
                 update(s => {
                     const currentBookNotes = s.bookCache[bookId] || [];
@@ -175,7 +175,7 @@ function createNotesStore() {
                         allNotes: s.allNotes.map(applyUpdateExact)
                     };
                 });
-            } catch (err: any) {
+            } catch (err: unknown) {
                 // Rollback
                 if (oldNote) {
                     update(s => {
@@ -216,7 +216,7 @@ function createNotesStore() {
 
             try {
                 await api.delete(`/notes/${id}`);
-            } catch (err: any) {
+            } catch (err: unknown) {
                 // Rollback
                 if (oldNote) {
                     update(s => {

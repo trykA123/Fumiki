@@ -50,7 +50,7 @@
         try {
             view.renderer.setStyles(css);
         } catch (e) {
-            console.error("Failed to set styles:", e);
+            // non-critical UI setting failure
         }
     }
 

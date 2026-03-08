@@ -14,7 +14,7 @@
         onclick?: (e: MouseEvent) => void;
     } = $props();
     const baseClass =
-        "bg-surface-1 border border-border-subtle rounded-lg p-[var(--card-padding)] shadow-[0_2px_8px_var(--shadow-color)] relative root-mori:border-none root-mori:shadow-[0_2px_12px_var(--shadow-color),0_0_0_1px_hsl(145_12%_40%/0.04)]";
+        "bg-surface-1 border border-border-subtle rounded-lg p-[var(--card-padding)] shadow-[0_2px_8px_var(--shadow-color)] relative root-mori:border-none root-mori:shadow-[0_2px_12px_var(--shadow-color),0_0_0_1px_var(--shadow-color)]";
 
     const variantClasses = {
         default: "",

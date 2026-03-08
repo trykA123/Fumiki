@@ -121,10 +121,7 @@
                             popoverVisible = true;
                             uiVisible = false; // Hide reader UI when highlighting
                         } catch (err) {
-                            console.warn(
-                                "Failed to generate Selection CFI",
-                                err,
-                            );
+                            // CFI generation failure is non-critical
                         }
                     } else if (
                         sel &&
@@ -154,7 +151,6 @@
 
             loading = false;
         } catch (e: any) {
-            console.error("Failed to load reader:", e);
             error = e.message || "Failed to load ebook";
             loading = false;
         }

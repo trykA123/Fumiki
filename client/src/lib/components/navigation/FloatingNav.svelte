@@ -15,7 +15,7 @@
     class="fixed bottom-[calc(var(--space-6)+env(safe-area-inset-bottom,0px))] left-0 right-0 flex justify-center z-[var(--z-sticky,40)] pointer-events-none"
 >
     <nav
-        class="flex items-center p-2 bg-surface-1 rounded-full shadow-[0_8px_32px_var(--shadow-color),0_0_0_1px_hsl(145_12%_40%/0.04)] pointer-events-auto backdrop-blur-md relative overflow-hidden"
+        class="flex items-center p-2 bg-surface-1 rounded-full shadow-[0_8px_32px_var(--shadow-color),0_0_0_1px_var(--shadow-color)] pointer-events-auto backdrop-blur-md relative overflow-hidden"
     >
         <div
             class="absolute inset-0 pointer-events-none rounded-inherit mix-blend-overlay z-0 hidden root-mori:block"

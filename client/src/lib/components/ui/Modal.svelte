@@ -47,12 +47,12 @@
 <!-- svelte-ignore a11y_no_noninteractive_element_interactions -->
 <dialog
     bind:this={dialog}
-    class={`p-0 bg-transparent border-none max-w-[480px] w-full m-auto backdrop:bg-[hsl(0_0%_0%/0.5)] backdrop:z-[var(--z-modal)] ${className}`}
+    class={`p-0 bg-transparent border-none max-w-[480px] w-full m-auto backdrop:bg-black/50 backdrop:z-[var(--z-modal)] ${className}`}
     onclose={closeDialog}
     onclick={handleBackdropClick}
 >
     <div
-        class="bg-surface-1 border border-border-medium rounded-lg p-7 shadow-[0_16px_48px_var(--shadow-color)] relative root-sumi:rounded-none root-kami:shadow-[0_20px_60px_var(--shadow-color)] root-kami:bg-transparent root-mori:border-none root-mori:shadow-[0_16px_48px_var(--shadow-color),0_0_0_1px_hsl(145_12%_40%/0.04)]"
+        class="bg-surface-1 border border-border-medium rounded-lg p-7 shadow-[0_16px_48px_var(--shadow-color)] relative root-sumi:rounded-none root-kami:shadow-[0_20px_60px_var(--shadow-color)] root-kami:bg-transparent root-mori:border-none root-mori:shadow-[0_16px_48px_var(--shadow-color),0_0_0_1px_var(--shadow-color)]"
         onclick={(e) => e.stopPropagation()}
         role="document"
     >

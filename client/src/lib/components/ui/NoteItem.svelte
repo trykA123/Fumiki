@@ -49,12 +49,12 @@
                 <div
                     class="w-3 h-3 rounded-full"
                     style="background-color: {note.color === 'yellow'
-                        ? '#fef08a'
+                        ? 'var(--highlight-yellow)'
                         : note.color === 'blue'
-                          ? '#bfdbfe'
+                          ? 'var(--highlight-blue)'
                           : note.color === 'pink'
-                            ? '#fbcfe8'
-                            : '#bbf7d0'}"
+                            ? 'var(--highlight-pink)'
+                            : 'var(--highlight-green)'}"
                 ></div>
             {:else}
                 <Icon name="list" size={14} />

@@ -39,7 +39,7 @@ export class OllamaProvider implements AIProvider {
             throw new Error(`Ollama Error: ${response.statusText}`);
         }
 
-        const data = await response.json();
+        const data = await response.json() as { response: string };
         return data.response.trim();
     }
 }
@@ -80,7 +80,9 @@ export class OpenAIProvider implements AIProvider {
             throw new Error(`OpenAI Error: ${response.statusText}`);
         }
 
-        const data: any = await response.json();
+        const data = await response.json() as {
+            choices: { message: { role: string; content: string } }[];
+        };
         return data.choices[0].message.content.trim();
     }
 }
@@ -123,7 +125,9 @@ export class AnthropicProvider implements AIProvider {
             throw new Error(`Anthropic Error: ${response.statusText}`);
         }
 
-        const data: any = await response.json();
+        const data = await response.json() as {
+            content: { type: string; text: string }[];
+        };
         return data.content[0].text.trim();
     }
 }

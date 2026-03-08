@@ -16,8 +16,8 @@
     const intentClasses = {
         accent: "bg-accent-glow-strong text-[var(--accent-text,#fff)] border border-accent-border",
         success:
-            "bg-[hsl(155_45%_42%/0.12)] text-success border border-[hsl(155_45%_42%/0.2)]",
-        info: "bg-[hsl(210_100%_50%/0.12)] text-[var(--info,hsl(210_100%_50%))] border border-[hsl(210_100%_50%/0.2)]",
+            "bg-[var(--success)]/12 text-success border border-[var(--success)]/20",
+        info: "bg-[var(--info)]/12 text-[var(--info)] border border-[var(--info)]/20",
         muted: "bg-surface-3 text-text-secondary border border-border-subtle",
     };
 

@@ -21,10 +21,10 @@
     } = $props();
 
     const colors = [
-        { id: "yellow", hint: "bg-[#fef08a] dark:bg-[#ca8a04]/60" },
-        { id: "blue", hint: "bg-[#bfdbfe] dark:bg-[#2563eb]/60" },
-        { id: "green", hint: "bg-[#bbf7d0] dark:bg-[#16a34a]/60" },
-        { id: "pink", hint: "bg-[#fbcfe8] dark:bg-[#db2777]/60" },
+        { id: "yellow", hint: "bg-[var(--highlight-yellow)]" },
+        { id: "blue", hint: "bg-[var(--highlight-blue)]" },
+        { id: "green", hint: "bg-[var(--highlight-green)]" },
+        { id: "pink", hint: "bg-[var(--highlight-pink)]" },
     ];
 
     function handleAction(e: Event, action: () => void) {

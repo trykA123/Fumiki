@@ -50,7 +50,7 @@
         secondary:
             "bg-surface-3 text-text-primary hover:not(:disabled):bg-surface-4",
         ghost: "bg-transparent text-text-secondary border border-border-medium hover:not(:disabled):bg-surface-2 hover:not(:disabled):text-text-primary hover:not(:disabled):border-border-strong",
-        danger: "bg-error text-white hover:not(:disabled):bg-[hsl(0_84%_50%)]",
+        danger: "bg-error text-white hover:not(:disabled):bg-[var(--error)]",
         icon: "bg-transparent text-text-secondary hover:not(:disabled):bg-surface-2 hover:not(:disabled):text-text-primary root-sumi:normal-case root-sumi:tracking-normal root-sumi:font-semibold root-sumi:text-[length:inherit]", // Reset sumi overrides for icons
     };
 

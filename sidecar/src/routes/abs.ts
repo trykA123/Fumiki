@@ -1,4 +1,5 @@
 import { Hono } from 'hono';
+import type { StatusCode } from 'hono/utils/http-status';
 import { db } from '../db/db';
 import type { Env } from '../middleware/session';
 import { ABSProxy } from '../services/abs-proxy';
@@ -17,8 +18,8 @@ absRoutes.get('/libraries', async (c) => {
         const data = await proxy.getLibraries();
         return c.json({ data });
 
-    } catch (err: any) {
-        return c.json({ error: err.message || 'Failed to fetch libraries' }, 502);
+    } catch (err: unknown) {
+        return c.json({ error: err instanceof Error ? err.message : 'Failed to fetch libraries' }, 502);
     }
 });
 
@@ -49,8 +50,8 @@ absRoutes.get('/libraries/:id/items', async (c) => {
         const data = await proxy.getItems(id, SearchQuery.toString());
         return c.json({ data: data.results, total: data.total });
 
-    } catch (err: any) {
-        return c.json({ error: err.message || 'Failed to fetch items' }, 502);
+    } catch (err: unknown) {
+        return c.json({ error: err instanceof Error ? err.message : 'Failed to fetch items' }, 502);
     }
 });
 
@@ -116,8 +117,8 @@ absRoutes.get('/items/:id', async (c) => {
 
         return c.json({ data: mappedData });
 
-    } catch (err: any) {
-        return c.json({ error: err.message || 'Failed to fetch item' }, 502);
+    } catch (err: unknown) {
+        return c.json({ error: err instanceof Error ? err.message : 'Failed to fetch item' }, 502);
     }
 });
 
@@ -139,8 +140,8 @@ absRoutes.get('/items/:id/cover', async (c) => {
         c.header('Cache-Control', 'public, max-age=86400'); // 24 hours
         return c.body(buffer);
 
-    } catch (err: any) {
-        return c.json({ error: err.message || 'Failed to fetch cover stream' }, 502);
+    } catch (err: unknown) {
+        return c.json({ error: err instanceof Error ? err.message : 'Failed to fetch cover stream' }, 502);
     }
 });
 
@@ -165,11 +166,11 @@ absRoutes.get('/items/:id/stream', async (c) => {
             if (val) c.header(header, val);
         });
 
-        c.status(response.status as any);
-        return c.body(response.body as any);
+        c.status(response.status as StatusCode);
+        return c.body(response.body as ReadableStream);
 
-    } catch (err: any) {
-        return c.json({ error: err.message || 'Failed to proxy audio stream' }, 502);
+    } catch (err: unknown) {
+        return c.json({ error: err instanceof Error ? err.message : 'Failed to proxy audio stream' }, 502);
     }
 });
 
@@ -192,8 +193,8 @@ absRoutes.get('/items/:id/ebook', async (c) => {
         const buffer = await response.arrayBuffer();
         return c.body(buffer);
 
-    } catch (err: any) {
-        return c.json({ error: err.message || 'Failed to proxy ebook file' }, 502);
+    } catch (err: unknown) {
+        return c.json({ error: err instanceof Error ? err.message : 'Failed to proxy ebook file' }, 502);
     }
 });
 
@@ -222,7 +223,7 @@ absRoutes.patch('/items/:id/progress', async (c) => {
 
         return c.json({ data });
 
-    } catch (err: any) {
-        return c.json({ error: err.message || 'Failed to sync progress' }, 502);
+    } catch (err: unknown) {
+        return c.json({ error: err instanceof Error ? err.message : 'Failed to sync progress' }, 502);
     }
 });

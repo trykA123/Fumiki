@@ -1,3 +1,5 @@
+import type { ABSError, ABSLibrariesResponse, ABSItemsResponse, ABSItem, ABSProgressPayload } from '../../../shared/types';
+
 export class ABSProxy {
     private baseUrl: string;
     private token: string;
@@ -21,7 +23,7 @@ export class ABSProxy {
         if (!res.ok && res.status !== 206) {
             let errorMsg = 'Failed to fetch from AudioBookShelf';
             try {
-                const errData: any = await res.json();
+                const errData = await res.json() as ABSError;
                 errorMsg = errData.error || errorMsg;
             } catch (e) {
                 // Ignore parsing errors for error messages
@@ -34,19 +36,19 @@ export class ABSProxy {
 
     async getLibraries() {
         const res = await this.request('/api/libraries');
-        const data: any = await res.json();
+        const data = await res.json() as ABSLibrariesResponse;
         return data.libraries || [];
     }
 
     async getItems(libraryId: string, queryParams: string = '') {
         const res = await this.request(`/api/libraries/${libraryId}/items?${queryParams}`);
-        const data: any = await res.json();
+        const data = await res.json() as ABSItemsResponse;
         return data || { results: [], total: 0 };
     }
 
     async getItem(itemId: string, expanded: number = 1) {
         const res = await this.request(`/api/items/${itemId}?expanded=${expanded}`);
-        const data: any = await res.json();
+        const data = await res.json() as ABSItem;
         return data; // Needs downstream sanitization
     }
 
@@ -58,7 +60,7 @@ export class ABSProxy {
     async getAudioStream(itemId: string, range?: string | null) {
         // First get the item to find its primary audio file ID
         const itemRes = await this.request(`/api/items/${itemId}`);
-        const item = await itemRes.json() as any;
+        const item = await itemRes.json() as ABSItem;
         const fileId = item.media?.audioFiles?.[0]?.ino;
 
         if (!fileId) throw new Error("No audio file found for streaming");
@@ -75,7 +77,7 @@ export class ABSProxy {
         return this.request(`/api/items/${itemId}/download`);
     }
 
-    async updateProgress(itemId: string, payload: any) {
+    async updateProgress(itemId: string, payload: ABSProgressPayload) {
         const res = await this.request(`/api/me/progress/${itemId}`, {
             method: 'PATCH',
             headers: { 'Content-Type': 'application/json' },
@@ -84,7 +86,7 @@ export class ABSProxy {
         const text = await res.text();
         try {
             return text ? JSON.parse(text) : {};
-        } catch (e) {
+        } catch (err: unknown) {
             return {};
         }
     }

@@ -3,6 +3,7 @@ import { db } from '../db/db';
 import type { Env } from '../middleware/session';
 import { z } from 'zod';
 import { zValidator } from '@hono/zod-validator';
+import type { NoteRow } from '../../../shared/types';
 
 export const notesRoutes = new Hono<Env>();
 
@@ -40,7 +41,7 @@ notesRoutes.get('/export/:bookId', async (c) => {
             LEFT JOIN book_cache b ON n.book_id = b.id 
             WHERE n.connection_id = ? AND n.book_id = ?
             ORDER BY n.created_at ASC
-        `).all(user.id, bookId) as any[];
+        `).all(user.id, bookId) as NoteRow[];
 
         if (!notes || notes.length === 0) {
             return c.json({ error: 'No notes found to export' }, 404);
@@ -87,8 +88,8 @@ notesRoutes.get('/export/:bookId', async (c) => {
         c.header('Content-Disposition', `attachment; filename="${filename}"`);
 
         return c.body(md);
-    } catch (err: any) {
-        return c.json({ error: err.message || 'Failed to export notes' }, 500);
+    } catch (err: unknown) {
+        return c.json({ error: err instanceof Error ? err.message : 'Failed to export notes' }, 500);
     }
 });
 
@@ -114,7 +115,7 @@ notesRoutes.get('/', async (c) => {
             LEFT JOIN book_cache b ON n.book_id = b.id 
             WHERE n.connection_id = ?
         `;
-        const params: any[] = [user.id];
+        const params: (string | number)[] = [user.id];
 
         if (bookId) {
             query += ` AND n.book_id = ?`;
@@ -133,7 +134,7 @@ notesRoutes.get('/', async (c) => {
         params.push(limit, offset);
 
         // Mapper to camelCase
-        const mapNote = (n: any) => ({
+        const mapNote = (n: NoteRow) => ({
             id: n.id,
             bookId: n.book_id,
             bookTitle: n.bookTitle || undefined,
@@ -146,10 +147,10 @@ notesRoutes.get('/', async (c) => {
             updatedAt: n.updated_at
         });
 
-        const notes = db.query(query).all(...params).map(mapNote);
+        const notes = (db.query(query).all(...params) as NoteRow[]).map(mapNote);
 
         let countQuery = `SELECT COUNT(*) as count FROM notes WHERE connection_id = ?`;
-        const countParams: any[] = [user.id];
+        const countParams: string[] = [user.id];
         if (bookId) { countQuery += ` AND book_id = ?`; countParams.push(bookId); }
         if (type) { countQuery += ` AND type = ?`; countParams.push(type); }
         if (search) { countQuery += ` AND content LIKE ?`; countParams.push(`%${search}%`); }
@@ -157,8 +158,8 @@ notesRoutes.get('/', async (c) => {
         const totalResult = db.query(countQuery).get(...countParams) as { count: number };
 
         return c.json({ data: notes, total: totalResult.count });
-    } catch (err: any) {
-        return c.json({ error: err.message || 'Failed to fetch notes' }, 500);
+    } catch (err: unknown) {
+        return c.json({ error: err instanceof Error ? err.message : 'Failed to fetch notes' }, 500);
     }
 });
 
@@ -180,7 +181,7 @@ notesRoutes.get('/:bookId', async (c) => {
             LEFT JOIN book_cache b ON n.book_id = b.id 
             WHERE n.connection_id = ? AND n.book_id = ?
         `;
-        const params: any[] = [user.id, bookId];
+        const params: (string | number)[] = [user.id, bookId];
 
         if (type) {
             query += ` AND n.type = ?`;
@@ -190,7 +191,7 @@ notesRoutes.get('/:bookId', async (c) => {
         query += ` ORDER BY n.created_at DESC`;
 
         // Mapper to camelCase
-        const mapNote = (n: any) => ({
+        const mapNote = (n: NoteRow) => ({
             id: n.id,
             bookId: n.book_id,
             bookTitle: n.bookTitle || undefined,
@@ -203,11 +204,11 @@ notesRoutes.get('/:bookId', async (c) => {
             updatedAt: n.updated_at
         });
 
-        const notes = db.query(query).all(...params).map(mapNote);
+        const notes = (db.query(query).all(...params) as NoteRow[]).map(mapNote);
 
         return c.json({ data: notes });
-    } catch (err: any) {
-        return c.json({ error: err.message || 'Failed to fetch book notes' }, 500);
+    } catch (err: unknown) {
+        return c.json({ error: err instanceof Error ? err.message : 'Failed to fetch book notes' }, 500);
     }
 });
 
@@ -228,7 +229,7 @@ notesRoutes.post('/', zValidator('json', createNoteSchema), async (c) => {
             RETURNING *
         `);
 
-        const result: any = stmt.get(
+        const result = stmt.get(
             user.id,
             body.bookId,
             body.type,
@@ -236,7 +237,7 @@ notesRoutes.post('/', zValidator('json', createNoteSchema), async (c) => {
             body.color || null,
             body.positionType,
             JSON.stringify(body.positionValue)
-        );
+        ) as Pick<NoteRow, 'id' | 'book_id' | 'type' | 'content' | 'color' | 'position_type' | 'position_value' | 'created_at' | 'updated_at'>;
 
         // Map response to camelCase
         const mappedResult = {
@@ -252,8 +253,8 @@ notesRoutes.post('/', zValidator('json', createNoteSchema), async (c) => {
         };
 
         return c.json({ data: mappedResult }, 201);
-    } catch (err: any) {
-        return c.json({ error: err.message || 'Failed to create note' }, 500);
+    } catch (err: unknown) {
+        return c.json({ error: err instanceof Error ? err.message : 'Failed to create note' }, 500);
     }
 });
 
@@ -281,12 +282,12 @@ notesRoutes.patch('/:id', zValidator('json', updateNoteSchema), async (c) => {
             RETURNING *
         `);
 
-        const result: any = stmt.get(
+        const result = stmt.get(
             body.content !== undefined ? body.content : null,
             body.color !== undefined ? body.color : null,
             id,
             user.id
-        );
+        ) as Pick<NoteRow, 'id' | 'book_id' | 'type' | 'content' | 'color' | 'position_type' | 'position_value' | 'created_at' | 'updated_at'>;
 
         // Map response to camelCase
         const mappedResult = {
@@ -302,8 +303,8 @@ notesRoutes.patch('/:id', zValidator('json', updateNoteSchema), async (c) => {
         };
 
         return c.json({ data: mappedResult });
-    } catch (err: any) {
-        return c.json({ error: err.message || 'Failed to update note' }, 500);
+    } catch (err: unknown) {
+        return c.json({ error: err instanceof Error ? err.message : 'Failed to update note' }, 500);
     }
 });
 
@@ -326,7 +327,7 @@ notesRoutes.delete('/:id', async (c) => {
         }
 
         return c.json({ data: { deleted: true } });
-    } catch (err: any) {
-        return c.json({ error: err.message || 'Failed to delete note' }, 500);
+    } catch (err: unknown) {
+        return c.json({ error: err instanceof Error ? err.message : 'Failed to delete note' }, 500);
     }
 });

@@ -1,5 +1,6 @@
 import { writable, derived } from 'svelte/store';
 import { api } from '$lib/api/client';
+import type { ABSItem, ABSLibrary } from '../../../../shared/types';
 
 export interface Book {
   id: string;
@@ -45,9 +46,9 @@ function createLibraryStore() {
 
     async loadLibraries() {
       try {
-        const libs = await api.get<any[]>('/abs/libraries');
+        const libs = await api.get<ABSLibrary[]>('/abs/libraries');
         // Filter to book libraries only (exclude podcasts for now in Phase 1)
-        const bookLibs = libs.filter((l: any) => l.mediaType === 'book');
+        const bookLibs = libs.filter((l: ABSLibrary) => l.mediaType === 'book');
         update(s => ({
           ...s,
           libraries: bookLibs,
@@ -56,8 +57,8 @@ function createLibraryStore() {
         if (bookLibs.length > 0) {
           await this.loadBooks(0, bookLibs[0]?.id);
         }
-      } catch (err: any) {
-        update(s => ({ ...s, error: err.message }));
+      } catch (err: unknown) {
+        update(s => ({ ...s, error: err instanceof Error ? err.message : String(err) }));
       }
     },
 
@@ -84,12 +85,12 @@ function createLibraryStore() {
 
         // Search and Filter are handled purely client-side for maximum speed and accuracy
 
-        const result: any = await api.get<any>(
+        const result: ABSItem[] = await api.get<ABSItem[]>(
           `/abs/libraries/${libraryIdToUse}/items?${params.toString()}`
         );
 
         // Normalize data to Fumiki Format
-        let parsedBooks: Book[] = result.map((item: any) => ({
+        let parsedBooks: Book[] = result.map((item: ABSItem) => ({
           id: item.id,
           title: item.media?.metadata?.title || 'Unknown Title',
           author: item.media?.metadata?.authorName || 'Unknown Author',
@@ -123,8 +124,8 @@ function createLibraryStore() {
           loading: false,
           error: null,
         }));
-      } catch (err: any) {
-        update(s => ({ ...s, loading: false, error: err.message }));
+      } catch (err: unknown) {
+        update(s => ({ ...s, loading: false, error: err instanceof Error ? err.message : String(err) }));
       }
     },
 

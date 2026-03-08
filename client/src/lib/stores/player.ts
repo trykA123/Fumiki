@@ -66,7 +66,6 @@ function createPlayerStore() {
         });
 
         audio.addEventListener('error', (e) => {
-            console.error("Audio error", e);
             update(s => ({ ...s, error: 'Failed to stream audio', loading: false }));
         });
 
@@ -109,7 +108,7 @@ function createPlayerStore() {
                 isFinished: time >= (state.activeBook.duration || audio.duration) - 10
             });
         } catch (e) {
-            console.error("Failed to sync progress", e);
+            // sync failure is silent
         }
     }
 

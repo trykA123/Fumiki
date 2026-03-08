@@ -29,7 +29,7 @@
               : intent === "warning"
                 ? "!border-l-[var(--warning)]"
                 : intent === "info"
-                  ? "!border-l-[#3b82f6]"
+                  ? "!border-l-[var(--info)]"
                   : ""
     } ${className}`}
     role="alert"

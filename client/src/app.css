@@ -237,6 +237,12 @@
         --error: hsl(0 65% 50%);
         --info: hsl(210 50% 55%);
 
+        /* Highlights */
+        --highlight-yellow: #fef08a;
+        --highlight-blue: #bfdbfe;
+        --highlight-pink: #fbcfe8;
+        --highlight-green: #bbf7d0;
+
         /* Borders */
         --border-subtle: hsla(250 10% 50% / 0.08);
         --border-medium: hsla(250 10% 50% / 0.14);
@@ -309,6 +315,12 @@
         --error: hsl(0 60% 42%);
         --info: hsl(205 45% 40%);
 
+        /* Highlights */
+        --highlight-yellow: #fef08a;
+        --highlight-blue: #bfdbfe;
+        --highlight-pink: #fbcfe8;
+        --highlight-green: #bbf7d0;
+
         /* Borders */
         --border-subtle: hsla(30 15% 30% / 0.08);
         --border-medium: hsla(30 15% 30% / 0.14);
@@ -378,6 +390,12 @@
         --warning: hsl(45 75% 50%);
         --error: hsl(0 55% 48%);
         --info: hsl(190 40% 45%);
+
+        /* Highlights */
+        --highlight-yellow: #fef08a;
+        --highlight-blue: #bfdbfe;
+        --highlight-pink: #fbcfe8;
+        --highlight-green: #bbf7d0;
 
         /* Borders */
         --border-subtle: hsla(145 12% 40% / 0.08);
