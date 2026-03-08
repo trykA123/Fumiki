@@ -9,67 +9,22 @@
 </script>
 
 {#if $theme?.decorations?.dividerStyle === "dots"}
-    <div class="divider dots {className}" role="separator">
-        <span class="dot"></span>
+    <div
+        class={`my-6 flex justify-center items-center gap-2 ${className}`}
+        role="separator"
+    >
+        <span class="block w-1 h-1 bg-text-muted rounded-full opacity-30"
+        ></span>
+        <span class="block w-1 h-1 bg-text-muted rounded-full opacity-30"
+        ></span>
+        <span class="block w-1 h-1 bg-text-muted rounded-full opacity-30"
+        ></span>
     </div>
 {:else if $theme?.decorations?.dividerStyle === "space"}
-    <div class="divider space {className}" role="separator"></div>
+    <div class={`my-6 h-0 border-none ${className}`} role="separator"></div>
 {:else}
-    <div class="divider line {className}" role="separator"></div>
+    <div
+        class={`my-6 h-[2px] bg-gradient-to-r from-transparent via-accent to-transparent [mask:url(&quot;data:image/svg+xml,%3Csvg%20xmlns='http://www.w3.org/2000/svg'%20width='200'%20height='4'%3E%3Cpath%20d='M0%202%20Q25%200%2050%202%20Q75%204%20100%202%20Q125%200%20150%202%20Q175%204%20200%202'%20stroke='white'%20stroke-width='3'%20fill='none'/%3E%3C/svg%3E&quot;)_repeat-x] [mask-size:200px_4px] [-webkit-mask:url(&quot;data:image/svg+xml,%3Csvg%20xmlns='http://www.w3.org/2000/svg'%20width='200'%20height='4'%3E%3Cpath%20d='M0%202%20Q25%200%2050%202%20Q75%204%20100%202%20Q125%200%20150%202%20Q175%204%20200%202'%20stroke='white'%20stroke-width='3'%20fill='none'/%3E%3C/svg%3E&quot;)_repeat-x] [-webkit-mask-size:200px_4px] root-kami:h-[1px] root-kami:bg-none root-kami:bg-border-subtle root-kami:[mask:none] root-kami:[-webkit-mask:none] ${className}`}
+        role="separator"
+    ></div>
 {/if}
-
-<style>
-    .divider {
-        margin: var(--space-6) 0;
-    }
-
-    /* Pattern/Line */
-    .divider.line {
-        height: 2px;
-        background: linear-gradient(
-            90deg,
-            transparent,
-            var(--accent),
-            transparent
-        );
-        mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='200' height='4'%3E%3Cpath d='M0 2 Q25 0 50 2 Q75 4 100 2 Q125 0 150 2 Q175 4 200 2' stroke='white' stroke-width='3' fill='none'/%3E%3C/svg%3E")
-            repeat-x;
-        mask-size: 200px 4px;
-        -webkit-mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='200' height='4'%3E%3Cpath d='M0 2 Q25 0 50 2 Q75 4 100 2 Q125 0 150 2 Q175 4 200 2' stroke='white' stroke-width='3' fill='none'/%3E%3C/svg%3E")
-            repeat-x;
-        -webkit-mask-size: 200px 4px;
-    }
-
-    /* Kami overrides line with solid rule */
-    :global([data-theme="kami"]) .divider.line {
-        height: 1px;
-        background: var(--border-subtle);
-        mask: none;
-        -webkit-mask: none;
-    }
-
-    /* Dots */
-    .divider.dots {
-        display: flex;
-        justify-content: center;
-        align-items: center;
-        gap: 8px;
-    }
-    .divider.dots::before,
-    .divider.dots::after,
-    .divider.dots .dot {
-        content: "";
-        display: block;
-        width: 4px;
-        height: 4px;
-        background: var(--text-muted);
-        border-radius: 50%;
-        opacity: 0.3;
-    }
-
-    /* Space (Mori can use space just by existing) */
-    .divider.space {
-        height: 0;
-        border: none;
-    }
-</style>

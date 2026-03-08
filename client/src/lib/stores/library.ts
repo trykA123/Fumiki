@@ -78,24 +78,23 @@ function createLibraryStore() {
 
         const params = new URLSearchParams({
           page: String(page),
-          limit: '50',
+          limit: '10000', // Load deep to allow accurate client-side filtering
           sort: state.sortBy,
         });
 
-        if (state.searchQuery) params.append('search', state.searchQuery);
-        if (state.filter !== 'all') params.append('filter', state.filter);
+        // Search and Filter are handled purely client-side for maximum speed and accuracy
 
         const result: any = await api.get<any>(
           `/abs/libraries/${libraryIdToUse}/items?${params.toString()}`
         );
 
         // Normalize data to Fumiki Format
-        const parsedBooks: Book[] = result.map((item: any) => ({
+        let parsedBooks: Book[] = result.map((item: any) => ({
           id: item.id,
           title: item.media?.metadata?.title || 'Unknown Title',
           author: item.media?.metadata?.authorName || 'Unknown Author',
           coverUrl: `/api/abs/items/${item.id}/cover`,
-          mediaType: item.mediaType === 'book' && item.media?.audioFiles ? 'audiobook' : 'ebook',
+          mediaType: item.mediaType === 'book' && item.media?.duration ? 'audiobook' : 'ebook',
           duration: item.media?.duration || null,
           pages: item.media?.metadata?.numPages || null,
           progress: item.userMediaProgress?.progress || 0,
@@ -104,10 +103,23 @@ function createLibraryStore() {
           addedAt: item.addedAt || Date.now()
         }));
 
+        // Client-side filtering
+        if (state.filter !== 'all') {
+          parsedBooks = parsedBooks.filter((b) => b.mediaType === state.filter);
+        }
+
+        // Client-side auto-search
+        if (state.searchQuery) {
+          const q = state.searchQuery.toLowerCase();
+          parsedBooks = parsedBooks.filter((b) =>
+            b.title.toLowerCase().includes(q) || b.author.toLowerCase().includes(q)
+          );
+        }
+
         update(s => ({
           ...s,
           books: page === 0 ? parsedBooks : [...s.books, ...parsedBooks],
-          total: result.total || parsedBooks.length,
+          total: parsedBooks.length,
           loading: false,
           error: null,
         }));

@@ -16,63 +16,29 @@
     const percentage = $derived(
         Math.min(Math.max((value / max) * 100, 0), 100),
     );
+
+    const sizeClasses = {
+        xs: "h-[2px]",
+        sm: "h-[3px]",
+        md: "h-[5px]",
+        lg: "h-[8px]",
+    };
+
+    const intentClasses = {
+        accent: "bg-accent root-mori:shadow-[0_0_8px_var(--accent-glow)]",
+        success: "bg-success root-mori:shadow-[0_0_8px_var(--success)]",
+    };
 </script>
 
 <div
-    class="progress-track progress-{size} {className}"
+    class={`bg-surface-3 rounded-full overflow-hidden w-full root-sumi:rounded-none ${sizeClasses[size] || sizeClasses.md} ${className}`}
     role="progressbar"
     aria-valuenow={value}
     aria-valuemin="0"
     aria-valuemax={max}
 >
     <div
-        class="progress-fill progress-fill-{intent}"
+        class={`h-full rounded-inherit transition-[width] duration-600 ease-[cubic-bezier(0.16,1,0.3,1)] root-sumi:rounded-none ${intentClasses[intent]}`}
         style="width: {percentage}%;"
     ></div>
 </div>
-
-<style>
-    .progress-track {
-        background: var(--surface-3);
-        border-radius: 100px;
-        overflow: hidden;
-        width: 100%;
-    }
-
-    .progress-xs {
-        height: 2px;
-    }
-    .progress-sm {
-        height: 3px;
-    }
-    .progress-md {
-        height: 5px;
-    }
-    .progress-lg {
-        height: 8px;
-    }
-
-    .progress-fill {
-        height: 100%;
-        border-radius: inherit;
-        transition: width 600ms cubic-bezier(0.16, 1, 0.3, 1);
-    }
-
-    .progress-fill-accent {
-        background: var(--accent);
-    }
-    .progress-fill-success {
-        background: var(--success);
-    }
-
-    /* Sumi: flat, thin */
-    :global([data-theme="sumi"]) .progress-track,
-    :global([data-theme="sumi"]) .progress-fill {
-        border-radius: 0;
-    }
-
-    /* Mori: subtle glow */
-    :global([data-theme="mori"]) .progress-fill {
-        box-shadow: 0 0 8px var(--accent-glow);
-    }
-</style>

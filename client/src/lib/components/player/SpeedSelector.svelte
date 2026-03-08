@@ -12,40 +12,9 @@
 </script>
 
 <button
-    class="speed-btn"
+    class="bg-transparent border border-border-subtle text-text-base cursor-pointer h-9 min-w-[54px] rounded-md flex items-center justify-center font-mono text-sm font-medium transition-all duration-200 hover:bg-surface-2 hover:border-border-strong active:scale-95"
     onclick={cycleSpeed}
     aria-label="Playback speed: {$player.playbackRate}x"
 >
-    <span class="value">{$player.playbackRate}x</span>
+    <span>{$player.playbackRate}x</span>
 </button>
-
-<style>
-    .speed-btn {
-        background: transparent;
-        border: 1px solid var(--border-subtle);
-        color: var(--text-base);
-        cursor: pointer;
-        height: 36px;
-        min-width: 54px;
-        border-radius: var(--radius-md);
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        font-family: var(--font-mono);
-        font-size: var(--text-sm);
-        font-weight: 500;
-        transition:
-            background-color var(--transition-base),
-            color var(--transition-base),
-            border-color var(--transition-base);
-    }
-
-    .speed-btn:hover {
-        background-color: var(--surface-2);
-        border-color: var(--border-strong);
-    }
-
-    .speed-btn:active {
-        transform: scale(0.95);
-    }
-</style>

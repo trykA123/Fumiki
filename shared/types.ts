@@ -61,3 +61,16 @@ export interface BookDetail {
     totalKp: number;
     noteCount: number;
 }
+
+export interface Note {
+    id: string;
+    bookId: string;
+    bookTitle?: string;
+    type: 'note' | 'highlight' | 'bookmark';
+    content: string | null;
+    color: string | null;
+    positionType: 'audio' | 'ebook';
+    positionValue: Record<string, any>;
+    createdAt: number;
+    updatedAt: number;
+}

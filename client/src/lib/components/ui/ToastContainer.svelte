@@ -5,13 +5,15 @@
     import { fly, fade } from "svelte/transition";
 </script>
 
-<div class="toast-container">
+<div
+    class="fixed right-4 z-[9999] flex flex-col gap-2 pointer-events-none bottom-[calc(env(safe-area-inset-bottom,0px)+var(--space-4))] items-end max-md:left-4 max-md:items-center max-md:bottom-[calc(56px+env(safe-area-inset-bottom,0px)+var(--space-4))]"
+>
     {#each $toast as t (t.id)}
         <div
             in:fly={{ y: 20, duration: 400, opacity: 0 }}
             out:fade={{ duration: 200 }}
             animate:flip={{ duration: 300 }}
-            class="toast-wrapper"
+            class="pointer-events-auto"
         >
             <Toast
                 id={t.id}
@@ -22,32 +24,3 @@
         </div>
     {/each}
 </div>
-
-<style>
-    .toast-container {
-        position: fixed;
-        bottom: calc(env(safe-area-inset-bottom, 0px) + var(--space-4));
-        right: var(--space-4);
-        /* Mobile: Keep above the bottom nav */
-        z-index: 9999;
-        display: flex;
-        flex-direction: column;
-        align-items: flex-end;
-        gap: var(--space-2);
-        pointer-events: none; /* Let clicks pass through container */
-    }
-
-    @media (max-width: 767px) {
-        .toast-container {
-            bottom: calc(
-                56px + env(safe-area-inset-bottom, 0px) + var(--space-4)
-            );
-            left: var(--space-4); /* Full width on mobile to center them */
-            align-items: center;
-        }
-    }
-
-    .toast-wrapper {
-        pointer-events: auto; /* Re-enable clicks on the actual toast */
-    }
-</style>

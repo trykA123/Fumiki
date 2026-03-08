@@ -11,59 +11,20 @@
     ];
 </script>
 
-<nav class="bottom-nav">
+<nav
+    class="fixed bottom-0 left-0 right-0 h-[56px] bg-surface-1 border-t border-border-subtle flex items-center justify-around pb-[env(safe-area-inset-bottom)] z-[var(--z-sticky,40)] root-mori:border-t-0 root-mori:shadow-[0_-4px_16px_var(--shadow-color)]"
+>
     {#each items as item}
         <a
             href={item.href}
-            class="bottom-nav-item"
-            class:active={page.url.pathname === item.href}
+            class={`flex flex-col items-center gap-[2px] px-3 py-[6px] text-[10px] font-semibold no-underline transition-colors duration-150 ${
+                page.url.pathname === item.href
+                    ? "text-accent"
+                    : "text-text-muted"
+            }`}
         >
-            <Icon name={item.icon} class="bottom-nav-icon" />
+            <Icon name={item.icon} class="text-[20px]" />
             <span>{item.name}</span>
         </a>
     {/each}
 </nav>
-
-<style>
-    .bottom-nav {
-        position: fixed;
-        bottom: 0;
-        left: 0;
-        right: 0;
-        height: 56px;
-        background: var(--surface-1);
-        border-top: 1px solid var(--border-subtle);
-        display: flex;
-        align-items: center;
-        justify-content: space-around;
-        padding-bottom: env(safe-area-inset-bottom);
-        z-index: var(--z-sticky);
-    }
-
-    .bottom-nav-item {
-        display: flex;
-        flex-direction: column;
-        align-items: center;
-        gap: 2px;
-        padding: 6px 12px;
-        color: var(--text-muted);
-        font-size: 10px;
-        font-weight: 600;
-        text-decoration: none;
-        transition: color 150ms;
-    }
-
-    .bottom-nav-item.active {
-        color: var(--accent);
-    }
-
-    :global(.bottom-nav-icon) {
-        font-size: 20px;
-    }
-
-    /* Mori: No hard top border, use soft shadow */
-    :global([data-theme="mori"]) .bottom-nav {
-        border-top: none;
-        box-shadow: 0 -4px 16px var(--shadow-color);
-    }
-</style>

@@ -27,8 +27,10 @@
     }
 </script>
 
-<div class="search-container {className}">
-    <div class="search-icon">
+<div class={`relative flex items-center w-full max-w-[480px] ${className}`}>
+    <div
+        class="absolute left-3 text-text-muted pointer-events-none flex items-center justify-center"
+    >
         <Icon name="search" size={18} />
     </div>
     <input
@@ -36,67 +38,6 @@
         {value}
         oninput={handleInput}
         {placeholder}
-        class="search-input"
+        class="w-full h-10 pl-10 pr-4 rounded-full border border-border-medium bg-surface-1 text-text-primary font-body text-sm transition-all duration-200 hover:bg-surface-2 hover:border-border-strong focus:outline-none focus:bg-surface-0 focus:border-accent focus:shadow-[0_0_0_1px_var(--accent)] placeholder:text-text-muted [&::-webkit-search-cancel-button]:appearance-none [&::-webkit-search-cancel-button]:h-4 [&::-webkit-search-cancel-button]:w-4 [&::-webkit-search-cancel-button]:bg-text-muted [&::-webkit-search-cancel-button]:cursor-pointer [&::-webkit-search-cancel-button]:[mask-image:url(&quot;data:image/svg+xml,%3Csvg%20xmlns='http://www.w3.org/2000/svg'%20viewBox='0%200%2024%2024'%20fill='none'%20stroke='currentColor'%20stroke-width='2'%20stroke-linecap='round'%20stroke-linejoin='round'%3E%3Cline%20x1='18'%20y1='6'%20x2='6'%20y2='18'%3E%3C/line%3E%3Cline%20x1='6'%20y1='6'%20x2='18'%20y2='18'%3E%3C/line%3E%3C/svg%3E&quot;)] [&::-webkit-search-cancel-button]:[-webkit-mask-image:url(&quot;data:image/svg+xml,%3Csvg%20xmlns='http://www.w3.org/2000/svg'%20viewBox='0%200%2024%2024'%20fill='none'%20stroke='currentColor'%20stroke-width='2'%20stroke-linecap='round'%20stroke-linejoin='round'%3E%3Cline%20x1='18'%20y1='6'%20x2='6'%20y2='18'%3E%3C/line%3E%3Cline%20x1='6'%20y1='6'%20x2='18'%20y2='18'%3E%3C/line%3E%3C/svg%3E&quot;)]"
     />
 </div>
-
-<style>
-    .search-container {
-        position: relative;
-        display: flex;
-        align-items: center;
-        width: 100%;
-        max-width: 480px;
-    }
-
-    .search-icon {
-        position: absolute;
-        left: 12px;
-        color: var(--text-muted);
-        pointer-events: none;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-    }
-
-    .search-input {
-        width: 100%;
-        height: 40px;
-        padding: 0 16px 0 40px;
-        border-radius: 100px;
-        border: 1px solid var(--border-medium);
-        background: var(--surface-1);
-        color: var(--text-primary);
-        font-family: var(--font-body);
-        font-size: var(--text-sm);
-        transition: all 0.2s ease;
-    }
-
-    .search-input:hover {
-        background: var(--surface-2);
-        border-color: var(--border-strong);
-    }
-
-    .search-input:focus {
-        outline: none;
-        background: var(--surface-0);
-        border-color: var(--accent);
-        box-shadow: 0 0 0 1px var(--accent);
-    }
-
-    .search-input::placeholder {
-        color: var(--text-muted);
-    }
-
-    /* Cancel Search Icon (WebKit) */
-    .search-input::-webkit-search-cancel-button {
-        -webkit-appearance: none;
-        appearance: none;
-        height: 16px;
-        width: 16px;
-        background-color: var(--text-muted);
-        mask-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='currentColor' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'><line x1='18' y1='6' x2='6' y2='18'></line><line x1='6' y1='6' x2='18' y2='18'></line></svg>");
-        -webkit-mask-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='currentColor' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'><line x1='18' y1='6' x2='6' y2='18'></line><line x1='6' y1='6' x2='18' y2='18'></line></svg>");
-        cursor: pointer;
-    }
-</style>

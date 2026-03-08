@@ -66,6 +66,34 @@ absRoutes.get('/items/:id', async (c) => {
         const proxy = new ABSProxy(config.value, user.token);
         const data = await proxy.getItem(id);
 
+        const mappedData = {
+            id: data.id,
+            title: data.media?.metadata?.title || 'Unknown Title',
+            subtitle: data.media?.metadata?.subtitle || null,
+            author: data.media?.metadata?.authorName || 'Unknown Author',
+            narrator: data.media?.metadata?.narratorName || null,
+            publisher: data.media?.metadata?.publisher || null,
+            publishedYear: data.media?.metadata?.publishedYear || null,
+            description: data.media?.metadata?.description || null,
+            coverUrl: `/api/abs/items/${data.id}/cover`,
+            genres: data.media?.metadata?.genres || [],
+            tags: data.media?.tags || [],
+            language: data.media?.metadata?.language || null,
+            isbn: data.media?.metadata?.isbn || null,
+            mediaType: data.mediaType === 'book' && data.media?.duration ? 'audiobook' : 'ebook',
+            duration: data.media?.duration || null,
+            chapters: data.media?.chapters || null,
+            pages: data.media?.metadata?.numPages || null,
+            ebookFormat: data.media?.ebookFormat || null,
+            progress: data.userMediaProgress?.progress || 0,
+            currentTime: data.userMediaProgress?.currentTime || null,
+            isFinished: data.userMediaProgress?.isFinished || false,
+            primaryCategory: 'Uncategorized',
+            secondaryCategory: null,
+            totalKp: 0,
+            noteCount: 0
+        };
+
         // Cache the metadata lookup asynchronously
         try {
             db.prepare(`
@@ -75,18 +103,18 @@ absRoutes.get('/items/:id', async (c) => {
                     title=excluded.title, author=excluded.author, 
                     cover_url=excluded.cover_url, progress=excluded.progress
             `).run(
-                data.id,
-                data.media.metadata.title,
-                data.media.metadata.authorName,
-                `/api/abs/items/${data.id}/cover`,
-                data.mediaType === 'book' && data.media.audioFiles ? 'audiobook' : 'ebook',
-                data.userMediaProgress ? data.userMediaProgress.progress : 0
+                mappedData.id,
+                mappedData.title,
+                mappedData.author,
+                mappedData.coverUrl,
+                mappedData.mediaType,
+                mappedData.progress
             );
         } catch (e) {
             console.error('Failed to cache book metadata', e);
         }
 
-        return c.json({ data });
+        return c.json({ data: mappedData });
 
     } catch (err: any) {
         return c.json({ error: err.message || 'Failed to fetch item' }, 502);

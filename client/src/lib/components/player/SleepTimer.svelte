@@ -36,52 +36,18 @@
 </script>
 
 <button
-    class="sleep-btn"
-    class:active={$player.sleepTimerRemaining !== null ||
-        options[currentIndex] !== 0}
+    class={`bg-transparent border border-border-subtle text-text-base cursor-pointer h-9 px-3 rounded-md flex items-center justify-center gap-2 transition-all duration-200 hover:bg-surface-2 hover:border-border-strong active:scale-95 ${
+        $player.sleepTimerRemaining !== null || options[currentIndex] !== 0
+            ? "!text-accent bg-[color-mix(in_srgb,var(--accent)_10%,transparent)] !border-accent"
+            : ""
+    }`}
     onclick={cycleSleepTimer}
     aria-label="Sleep timer"
 >
     <Icon name="moon" size={20} />
     {#if $player.sleepTimerRemaining !== null || options[currentIndex] !== 0}
-        <span class="label">{getDisplayLabel()}</span>
+        <span class="font-mono text-sm whitespace-nowrap"
+            >{getDisplayLabel()}</span
+        >
     {/if}
 </button>
-
-<style>
-    .sleep-btn {
-        background: transparent;
-        border: 1px solid var(--border-subtle);
-        color: var(--text-base);
-        cursor: pointer;
-        height: 36px;
-        padding: 0 var(--space-3);
-        border-radius: var(--radius-md);
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        gap: var(--space-2);
-        transition: all var(--transition-base);
-    }
-
-    .sleep-btn:hover {
-        background-color: var(--surface-2);
-        border-color: var(--border-strong);
-    }
-
-    .sleep-btn.active {
-        color: var(--accent);
-        background-color: color-mix(in srgb, var(--accent) 10%, transparent);
-        border-color: var(--accent);
-    }
-
-    .sleep-btn:active {
-        transform: scale(0.95);
-    }
-
-    .label {
-        font-family: var(--font-mono);
-        font-size: var(--text-sm);
-        white-space: nowrap;
-    }
-</style>

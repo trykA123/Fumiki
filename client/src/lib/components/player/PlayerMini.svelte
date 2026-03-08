@@ -6,27 +6,36 @@
 </script>
 
 {#if $player.activeBook}
-    <div class="mini-player" transition:slide={{ duration: 300, axis: "y" }}>
+    <div
+        class="fixed bottom-[64px] left-0 right-0 h-[64px] bg-surface-1 border-y border-border-subtle flex items-center justify-between pr-4 z-40 shadow-[0_-4px_12px_var(--shadow-color)] md:bottom-0 md:left-[240px] md:border-b-0"
+        transition:slide={{ duration: 300, axis: "y" }}
+    >
         <!-- Click background to go to full player -->
         <button
-            class="content"
+            class="flex items-center gap-3 bg-transparent border-none p-0 h-full flex-1 cursor-pointer text-left"
             onclick={() => goto(`/player/${$player.activeBook?.id}`)}
             aria-label="Open full player"
         >
             <img
                 src={`/api/abs/items/${$player.activeBook.id}/cover`}
                 alt="Cover"
-                class="cover"
+                class="h-full w-[48px] object-cover"
             />
-            <div class="info">
-                <span class="title">{$player.activeBook.title}</span>
-                <span class="author">{$player.activeBook.author}</span>
+            <div class="flex flex-col justify-center overflow-hidden">
+                <span
+                    class="text-sm font-medium text-text-base whitespace-nowrap overflow-hidden text-ellipsis leading-[1.2] mb-[2px]"
+                    >{$player.activeBook.title}</span
+                >
+                <span
+                    class="text-xs text-text-muted whitespace-nowrap overflow-hidden text-ellipsis"
+                    >{$player.activeBook.author}</span
+                >
             </div>
         </button>
 
-        <div class="actions">
+        <div class="flex items-center gap-2">
             <button
-                class="action-btn"
+                class="bg-transparent border-none text-text-base cursor-pointer w-10 h-10 rounded-full flex items-center justify-center transition-colors duration-200 hover:bg-surface-2"
                 onclick={() =>
                     $player.isPlaying ? player.pause() : player.play()}
                 aria-label={$player.isPlaying ? "Pause" : "Play"}
@@ -34,7 +43,7 @@
                 <Icon name={$player.isPlaying ? "pause" : "play"} size={24} />
             </button>
             <button
-                class="action-btn close-btn"
+                class="bg-transparent border-none text-text-muted cursor-pointer w-10 h-10 rounded-full flex items-center justify-center transition-colors duration-200 hover:bg-surface-2"
                 onclick={() => player.closePlayer()}
                 aria-label="Close player"
             >
@@ -43,9 +52,9 @@
         </div>
 
         <!-- Tiny progress bar at Absolute bottom -->
-        <div class="mini-progress">
+        <div class="absolute bottom-0 left-0 right-0 h-[2px] bg-transparent">
             <div
-                class="fill"
+                class="h-full bg-accent transition-[width] duration-200"
                 style="width: {$player.duration
                     ? ($player.currentTime / $player.duration) * 100
                     : 0}%"
@@ -53,123 +62,3 @@
         </div>
     </div>
 {/if}
-
-<style>
-    .mini-player {
-        position: fixed;
-        bottom: 64px; /* Default bottom nav height */
-        left: 0;
-        right: 0;
-        height: 64px;
-        background: var(--surface-1);
-        border-top: 1px solid var(--border-subtle);
-        border-bottom: 1px solid var(--border-subtle);
-        display: flex;
-        align-items: center;
-        justify-content: space-between;
-        padding: 0 var(--space-4) 0 0;
-        z-index: 40; /* Just below bottom nav (50) */
-        box-shadow: 0 -4px 12px var(--shadow-color);
-    }
-
-    /* Adjust for tablet side-nav */
-    @media (min-width: 768px) {
-        .mini-player {
-            bottom: 0;
-            left: 240px; /* Side nav width */
-            border-bottom: none;
-        }
-    }
-
-    .content {
-        display: flex;
-        align-items: center;
-        gap: var(--space-3);
-        background: transparent;
-        border: none;
-        padding: 0;
-        height: 100%;
-        flex: 1;
-        cursor: pointer;
-        text-align: left;
-    }
-
-    .cover {
-        height: 100%;
-        width: 48px;
-        object-fit: cover;
-    }
-
-    .info {
-        display: flex;
-        flex-direction: column;
-        justify-content: center;
-        overflow: hidden;
-    }
-
-    .title {
-        font-size: var(--text-sm);
-        font-weight: 500;
-        color: var(--text-base);
-        white-space: nowrap;
-        overflow: hidden;
-        text-overflow: ellipsis;
-        line-height: 1.2;
-        margin-bottom: 2px;
-    }
-
-    .author {
-        font-size: var(--text-xs);
-        color: var(--text-muted);
-        white-space: nowrap;
-        overflow: hidden;
-        text-overflow: ellipsis;
-    }
-
-    .actions {
-        display: flex;
-        align-items: center;
-        gap: var(--space-2);
-    }
-
-    .action-btn {
-        background: transparent;
-        border: none;
-        color: var(--text-base);
-        cursor: pointer;
-        width: 40px;
-        height: 40px;
-        border-radius: 50%;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        transition: background-color var(--transition-base);
-    }
-
-    .action-btn:hover {
-        background-color: var(--surface-2);
-    }
-
-    .close-btn {
-        color: var(--text-muted);
-    }
-
-    .mini-progress {
-        position: absolute;
-        bottom: 0;
-        left: 0;
-        right: 0;
-        height: 2px;
-        background: transparent;
-    }
-
-    .mini-progress .fill {
-        height: 100%;
-        background: var(--accent);
-        transition: width 0.2s linear;
-    }
-
-    :global([data-theme="mori"]) .mini-player {
-        background: color-mix(in srgb, var(--surface-1) 95%, var(--accent));
-    }
-</style>

@@ -56,16 +56,18 @@ export class ABSProxy {
     }
 
     async getAudioStream(itemId: string, range?: string | null) {
-        // We generally proxy to the direct ABS streaming endpoint (often /api/items/{id}/play)
-        // But ABS requires requesting the specific file for ranges. 
-        // A generic proxy to the ABS stream controller:
+        // First get the item to find its primary audio file ID
+        const itemRes = await this.request(`/api/items/${itemId}`);
+        const item = await itemRes.json() as any;
+        const fileId = item.media?.audioFiles?.[0]?.ino;
+
+        if (!fileId) throw new Error("No audio file found for streaming");
+
         const headers: Record<string, string> = {};
         if (range) headers['Range'] = range;
 
-        // We hit the raw playback endpoint that ABS Native uses.
-        // It's usually /api/items/{item_id}/play or /api/items/{item_id}/file/{file_id}
-        // Assuming hitting the primary stream endpoint for the item:
-        return this.request(`/api/items/${itemId}/play`, { headers });
+        // Progressive stream the specific file ID which natively supports `<audio>` playback.
+        return this.request(`/api/items/${itemId}/file/${fileId}`, { headers });
     }
 
     async getMediaFile(itemId: string) {
@@ -79,7 +81,11 @@ export class ABSProxy {
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify(payload)
         });
-        const data: any = await res.json();
-        return data;
+        const text = await res.text();
+        try {
+            return text ? JSON.parse(text) : {};
+        } catch (e) {
+            return {};
+        }
     }
 }

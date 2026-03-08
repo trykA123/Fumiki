@@ -18,23 +18,35 @@
         const target = e.target as HTMLInputElement;
         player.seek(parseFloat(target.value));
     }
+
+    const sliderClass =
+        `appearance-none w-full h-[6px] bg-surface-2 rounded-full outline-none m-0 z-10 absolute ` +
+        `[&::-webkit-slider-thumb]:appearance-none [&::-webkit-slider-thumb]:w-4 [&::-webkit-slider-thumb]:h-4 [&::-webkit-slider-thumb]:rounded-full ` +
+        `[&::-webkit-slider-thumb]:bg-accent [&::-webkit-slider-thumb]:cursor-pointer [&::-webkit-slider-thumb]:border-2 [&::-webkit-slider-thumb]:border-surface-0 ` +
+        `[&::-webkit-slider-thumb]:shadow-[0_2px_4px_rgba(0,0,0,0.2)] [&::-webkit-slider-thumb]:transition-transform [&::-webkit-slider-thumb]:duration-100 ` +
+        `active:[&::-webkit-slider-thumb]:scale-120 ` +
+        `[&::-moz-range-thumb]:w-4 [&::-moz-range-thumb]:h-4 [&::-moz-range-thumb]:rounded-full [&::-moz-range-thumb]:bg-accent ` +
+        `[&::-moz-range-thumb]:cursor-pointer [&::-moz-range-thumb]:border-2 [&::-moz-range-thumb]:border-surface-0 ` +
+        `[&::-moz-range-thumb]:shadow-[0_2px_4px_rgba(0,0,0,0.2)] [&::-moz-range-thumb]:transition-transform [&::-moz-range-thumb]:duration-100 ` +
+        `active:[&::-moz-range-thumb]:scale-120 ` +
+        `[&::-webkit-slider-runnable-track]:bg-transparent [&::-moz-range-track]:bg-transparent`;
 </script>
 
-<div class="seek-container">
-    <div class="time-labels">
-        <span class="time"
+<div class="w-full flex flex-col gap-2 py-4">
+    <div class="flex justify-between items-center px-1">
+        <span class="font-mono text-xs text-text-base"
             >{$player.currentTime
                 ? formatTime($player.currentTime)
                 : "0:00"}</span
         >
-        <span class="time remaining"
+        <span class="font-mono text-xs text-text-muted"
             >-{formatTime(
                 ($player.duration || 0) - ($player.currentTime || 0),
             )}</span
         >
     </div>
 
-    <div class="slider-wrapper">
+    <div class="relative h-[24px] flex items-center w-full">
         <input
             type="range"
             min="0"
@@ -42,114 +54,15 @@
             max={$player.duration || 100}
             value={$player.currentTime || 0}
             oninput={handleSeek}
-            class="seek-bar"
+            class={sliderClass}
             aria-label="Seek time"
         />
         <!-- Custom progress fill overlay -->
         <div
-            class="progress-fill"
+            class="absolute left-0 h-[6px] bg-accent rounded-full pointer-events-none z-[1]"
             style="width: {$player.duration
                 ? ($player.currentTime / $player.duration) * 100
                 : 0}%"
         ></div>
     </div>
 </div>
-
-<style>
-    .seek-container {
-        width: 100%;
-        display: flex;
-        flex-direction: column;
-        gap: var(--space-2);
-        padding: var(--space-4) 0;
-    }
-
-    .time-labels {
-        display: flex;
-        justify-content: space-between;
-        align-items: center;
-        padding: 0 var(--space-1);
-    }
-
-    .time {
-        font-family: var(--font-mono);
-        font-size: var(--text-xs);
-        color: var(--text-base);
-    }
-
-    .time.remaining {
-        color: var(--text-muted);
-    }
-
-    .slider-wrapper {
-        position: relative;
-        height: 24px;
-        display: flex;
-        align-items: center;
-        width: 100%;
-    }
-
-    .seek-bar {
-        -webkit-appearance: none;
-        appearance: none;
-        width: 100%;
-        height: 6px;
-        background: var(--surface-2);
-        border-radius: var(--radius-full);
-        outline: none;
-        margin: 0;
-        z-index: 2;
-        position: absolute;
-    }
-
-    /* We make the thumb visible and track transparent */
-    .seek-bar::-webkit-slider-thumb {
-        -webkit-appearance: none;
-        appearance: none;
-        width: 16px;
-        height: 16px;
-        border-radius: 50%;
-        background: var(--accent);
-        cursor: pointer;
-        border: 2px solid var(--surface-0);
-        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
-        transition: transform 0.1s;
-    }
-
-    .seek-bar::-moz-range-thumb {
-        width: 16px;
-        height: 16px;
-        border-radius: 50%;
-        background: var(--accent);
-        cursor: pointer;
-        border: 2px solid var(--surface-0);
-        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
-        transition: transform 0.1s;
-    }
-
-    .seek-bar:active::-webkit-slider-thumb {
-        transform: scale(1.2);
-    }
-
-    .seek-bar:active::-moz-range-thumb {
-        transform: scale(1.2);
-    }
-
-    /* Transparent track so custom fill shows underneath */
-    .seek-bar::-webkit-slider-runnable-track {
-        background: transparent;
-    }
-    .seek-bar::-moz-range-track {
-        background: transparent;
-    }
-
-    .progress-fill {
-        position: absolute;
-        left: 0;
-        height: 6px;
-        background: var(--accent);
-        border-radius: var(--radius-full);
-        pointer-events: none;
-        z-index: 1;
-    }
-</style>

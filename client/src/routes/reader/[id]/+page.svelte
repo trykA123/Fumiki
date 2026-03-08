@@ -6,6 +6,13 @@
     import ReaderFooter from "$lib/components/reader/ReaderFooter.svelte";
     import TocDrawer from "$lib/components/reader/TocDrawer.svelte";
     import SettingsPanel from "$lib/components/reader/SettingsPanel.svelte";
+    import HighlightPopover from "$lib/components/reader/HighlightPopover.svelte";
+    import NoteEditorModal from "$lib/components/reader/NoteEditorModal.svelte";
+    import NotesDrawer from "$lib/components/reader/NotesDrawer.svelte";
+
+    // Notes system
+    import { notesStore } from "$lib/stores/notes";
+    import { toast } from "$lib/stores/toast";
 
     let { data } = $props();
 
@@ -16,6 +23,7 @@
     let uiVisible = $state(false);
     let tocVisible = $state(false);
     let settingsVisible = $state(false);
+    let notesVisible = $state(false);
     let loading = $state(true);
     let error = $state<string | null>(null);
 
@@ -28,11 +36,27 @@
     // Extracted book data
     let tocList: Array<any> = $state([]);
 
+    // Highlight State
+    let popoverVisible = $state(false);
+    let activeHighlightId = $state<string | null>(null);
+    let activeColor = $state<string | null>(null);
+    let selectedText = $state("");
+    let selectedCFI = $state("");
+    let selectedIndex = $state(0);
+
+    let noteEditorVisible = $state(false);
+    let editNoteContent = $state("");
+
+    // Initial note load
+    onMount(() => {
+        notesStore.loadBookNotes(data.id);
+    });
+
     onMount(async () => {
         try {
             // Import foliate-js view
             // @ts-ignore
-            await import(/* @vite-ignore */ "/vendor/foliate-js/view.js");
+            await import(/* @vite-ignore */ "$lib/vendor/foliate-js/view.js");
 
             view = document.createElement("foliate-view") as any;
             container?.appendChild(view);
@@ -52,11 +76,71 @@
 
             // Open the book stream
             const bookUrl = `/api/abs/items/${data.id}/ebook`;
-            const openedBook = await view.open(bookUrl);
+            await view.open(bookUrl);
+            await view.init({ lastLocation: null }); // Render first page
+
+            // Force the reader to inherit the initial tailwind theme colors
+            try {
+                const computed = window.getComputedStyle(document.body);
+                const textColor =
+                    computed.getPropertyValue("--text-primary").trim() ||
+                    "inherit";
+                const accentColor =
+                    computed.getPropertyValue("--accent").trim() || "inherit";
+
+                const initCss = `
+                    @namespace epub "http://www.idpf.org/2007/ops";
+                    html { color: ${textColor} !important; }
+                    body { background: transparent !important; }
+                    a { color: ${accentColor} !important; }
+                    
+                    ::selection { background: rgba(125, 125, 125, 0.3); }
+                `;
+                view.renderer.setStyles(initCss);
+            } catch (ignore) {}
+
+            // Hook into text selection within the embedded document
+            view.addEventListener("load", (e: any) => {
+                const { doc, index } = e.detail;
+
+                doc.addEventListener("selectionchange", () => {
+                    const sel = doc.defaultView?.getSelection();
+                    if (
+                        sel &&
+                        !sel.isCollapsed &&
+                        sel.toString().trim().length > 0
+                    ) {
+                        try {
+                            const range = sel.getRangeAt(0);
+                            selectedCFI = view.getCFI(index, range);
+                            selectedText = sel.toString().trim();
+                            selectedIndex = index;
+
+                            activeHighlightId = null;
+                            activeColor = null;
+                            popoverVisible = true;
+                            uiVisible = false; // Hide reader UI when highlighting
+                        } catch (err) {
+                            console.warn(
+                                "Failed to generate Selection CFI",
+                                err,
+                            );
+                        }
+                    } else if (
+                        sel &&
+                        sel.isCollapsed &&
+                        popoverVisible &&
+                        !activeHighlightId
+                    ) {
+                        // Immediately close if unselected
+                        popoverVisible = false;
+                    }
+                });
+            });
 
             // Load table of contents
-            if (openedBook.toc) {
-                tocList = openedBook.toc;
+            if (view.book && view.book.toc) {
+                tocList = view.book.toc;
             }
 
             // Restore progress if the user was reading before
@@ -117,6 +201,7 @@
             if (!uiVisible) {
                 tocVisible = false;
                 settingsVisible = false;
+                notesVisible = false;
             }
         }
     }
@@ -124,7 +209,83 @@
     function navigateToc(href: string) {
         view?.goTo(href);
         tocVisible = false;
+        notesVisible = false;
         uiVisible = false;
+    }
+
+    // --- Highlight Handlers ---
+
+    async function handleAddHighlight(color: string) {
+        if (!selectedCFI || !data.id) return;
+
+        try {
+            await notesStore.createNote(
+                data.id,
+                "highlight",
+                "ebook",
+                { cfi: selectedCFI, excerpt: selectedText },
+                null, // No text content yet
+                color,
+            );
+
+            // Draw visually in foliate
+            view.addAnnotation({ value: selectedCFI });
+
+            view.deselect();
+            popoverVisible = false;
+            toast.add("Highlight saved", "success");
+        } catch (e) {
+            /* error handled in store */
+        }
+    }
+
+    function handleCopyText() {
+        if (selectedText) {
+            navigator.clipboard.writeText(selectedText);
+            toast.add("Copied to clipboard", "success");
+            view.deselect();
+            popoverVisible = false;
+        }
+    }
+
+    function handleOpenNote() {
+        view?.deselect();
+        popoverVisible = false;
+        editNoteContent = "";
+        activeHighlightId = null;
+        noteEditorVisible = true;
+    }
+
+    async function handleSaveNote(content: string) {
+        if (!selectedCFI || !data.id) return;
+
+        try {
+            await notesStore.createNote(
+                data.id,
+                "note", // Mark as note rather than highlight
+                "ebook",
+                { cfi: selectedCFI, excerpt: selectedText },
+                content,
+                activeColor || "yellow",
+            );
+
+            view.addAnnotation({ value: selectedCFI });
+            noteEditorVisible = false;
+            toast.add("Note saved", "success");
+        } catch (e) {
+            /* error handled in store */
+        }
+    }
+
+    async function handleDeleteHighlight() {
+        if (!activeHighlightId || !data.id) return;
+        try {
+            await notesStore.deleteNote(activeHighlightId, data.id);
+            view.deleteAnnotation({ value: selectedCFI });
+            popoverVisible = false;
+        } catch (e) {
+            /* error handled in store */
+        }
     }
 </script>
 
@@ -134,24 +295,32 @@
 
 <!-- svelte-ignore a11y_click_events_have_key_events -->
 <!-- svelte-ignore a11y_no_static_element_interactions -->
-<div class="reader-container" onclick={handleScreenClick}>
+<div
+    class="fixed inset-0 z-[9999] bg-surface-0 global-reader-override"
+    onclick={handleScreenClick}
+>
     <div
         bind:this={container}
-        class="foliate-wrapper"
-        style="--foliate-height: 100vh;"
+        class="w-full h-full [&>foliate-view]:block [&>foliate-view]:w-full [&>foliate-view]:h-full"
     >
         <!-- Foliate View dynamically injected here -->
     </div>
 
     {#if loading}
-        <div class="loader-overlay">
-            <div class="spinner"></div>
+        <div
+            class="absolute inset-0 flex flex-col items-center justify-center bg-surface-0 text-text-primary z-10"
+        >
+            <div
+                class="w-10 h-10 border-4 border-surface-2 border-t-accent rounded-full animate-spin mb-4"
+            ></div>
             <p>Loading book structure...</p>
         </div>
     {/if}
 
     {#if error}
-        <div class="error-overlay">
+        <div
+            class="absolute inset-0 flex flex-col items-center justify-center bg-surface-0 text-text-primary z-10"
+        >
             <p>Error: {error}</p>
             <button onclick={() => window.history.back()}>Go Back</button>
         </div>
@@ -159,8 +328,7 @@
 
     <!-- UI Overlay container ensures click catching for inner tools -->
     <div
-        class="reader-ui-overlay"
-        class:visible={uiVisible}
+        class={`absolute inset-0 z-20 ${uiVisible ? "pointer-events-auto" : "pointer-events-none"}`}
         onclick={(e) => e.stopPropagation()}
     >
         {#if uiVisible}
@@ -169,10 +337,17 @@
                 onToggleToc={() => {
                     tocVisible = !tocVisible;
                     settingsVisible = false;
+                    notesVisible = false;
+                }}
+                onToggleNotes={() => {
+                    notesVisible = !notesVisible;
+                    tocVisible = false;
+                    settingsVisible = false;
                 }}
                 onToggleSettings={() => {
                     settingsVisible = !settingsVisible;
                     tocVisible = false;
+                    notesVisible = false;
                 }}
             />
 
@@ -186,6 +361,14 @@
                 />
             {/if}
 
+            {#if notesVisible}
+                <NotesDrawer
+                    bookId={data.id}
+                    onNavigate={navigateToc}
+                    onClose={() => (notesVisible = false)}
+                />
+            {/if}
+
             {#if settingsVisible}
                 <SettingsPanel
                     {view}
@@ -194,73 +377,24 @@
             {/if}
         {/if}
     </div>
+
+    <HighlightPopover
+        visible={popoverVisible}
+        {activeColor}
+        onHighlight={handleAddHighlight}
+        onNote={handleOpenNote}
+        onCopy={handleCopyText}
+        onDelete={handleDeleteHighlight}
+        onClose={() => {
+            popoverVisible = false;
+            view?.deselect();
+        }}
+    />
+
+    <NoteEditorModal
+        visible={noteEditorVisible}
+        initialContent={editNoteContent}
+        onSave={handleSaveNote}
+        onClose={() => (noteEditorVisible = false)}
+    />
 </div>
-
-<style>
-    /* Fullscreen layout bypassing App Shell */
-    :global(body:has(.reader-container)) {
-        overflow: hidden;
-        margin: 0;
-        padding: 0;
-    }
-
-    .reader-container {
-        position: fixed;
-        inset: 0;
-        z-index: 9999;
-        /* Readers usually match the current theme base, foliate handles text rendering inside */
-        background: var(--surface-0);
-    }
-
-    .foliate-wrapper {
-        width: 100%;
-        height: 100%;
-    }
-
-    /* Foliate-view part styling targeting the custom element */
-    .foliate-wrapper :global(foliate-view) {
-        display: block;
-        width: 100%;
-        height: 100%;
-    }
-
-    .loader-overlay,
-    .error-overlay {
-        position: absolute;
-        inset: 0;
-        display: flex;
-        flex-direction: column;
-        align-items: center;
-        justify-content: center;
-        background: var(--surface-0);
-        color: var(--text-base);
-        z-index: 10;
-    }
-
-    .spinner {
-        width: 40px;
-        height: 40px;
-        border: 3px solid var(--surface-2);
-        border-top-color: var(--accent);
-        border-radius: 50%;
-        animation: spin 1s linear infinite;
-        margin-bottom: var(--space-4);
-    }
-
-    @keyframes spin {
-        to {
-            transform: rotate(360deg);
-        }
-    }
-
-    .reader-ui-overlay {
-        position: absolute;
-        inset: 0;
-        pointer-events: none; /* Let touches fall through to reader until an active UI is hit */
-        z-index: 20;
-    }
-
-    .reader-ui-overlay.visible {
-        pointer-events: auto; /* Catch taps to close things inside the overlay if needed, although mostly we bind carefully */
-    }
-</style>

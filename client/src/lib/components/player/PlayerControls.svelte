@@ -3,87 +3,26 @@
     import Icon from "$lib/components/Icon.svelte";
 </script>
 
-<div class="controls-container">
+<div class="flex items-center justify-center gap-8 py-4">
     <button
-        class="icon-btn"
+        class="bg-transparent border-none text-text-base cursor-pointer p-2 rounded-full flex items-center justify-center transition-colors duration-200 hover:bg-surface-2 hover:text-accent"
         onclick={() => player.skipBackward()}
         aria-label="Skip Backward 30s"
     >
         <Icon name="skip-back" size={32} />
     </button>
     <button
-        class="play-btn"
+        class="bg-surface-2 border-none text-accent cursor-pointer p-4 rounded-full flex items-center justify-center shadow-[0_4px_12px_var(--shadow-color)] transition-all duration-200 hover:scale-[1.05] hover:bg-surface-3 active:scale-[0.95] root-kami:shadow-[4px_4px_12px_var(--shadow-color)] root-kami:border-solid root-kami:border root-kami:border-border-subtle"
         onclick={() => ($player.isPlaying ? player.pause() : player.play())}
         aria-label={$player.isPlaying ? "Pause" : "Play"}
     >
         <Icon name={$player.isPlaying ? "pause" : "play"} size={48} />
     </button>
     <button
-        class="icon-btn"
+        class="bg-transparent border-none text-text-base cursor-pointer p-2 rounded-full flex items-center justify-center transition-colors duration-200 hover:bg-surface-2 hover:text-accent"
         onclick={() => player.skipForward()}
         aria-label="Skip Forward 30s"
     >
         <Icon name="skip-forward" size={32} />
     </button>
 </div>
-
-<style>
-    .controls-container {
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        gap: var(--space-8);
-        padding: var(--space-4) 0;
-    }
-
-    .icon-btn {
-        background: transparent;
-        border: none;
-        color: var(--text-base);
-        cursor: pointer;
-        padding: var(--space-2);
-        border-radius: 50%;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        transition:
-            background-color var(--transition-base),
-            color var(--transition-base);
-    }
-
-    .icon-btn:hover {
-        background-color: var(--surface-2);
-        color: var(--accent);
-    }
-
-    .play-btn {
-        background: var(--surface-2);
-        border: none;
-        color: var(--accent);
-        cursor: pointer;
-        padding: var(--space-4);
-        border-radius: 50%;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        box-shadow: 0 4px 12px var(--shadow-color);
-        transition:
-            transform var(--transition-base),
-            box-shadow var(--transition-base),
-            background-color var(--transition-base);
-    }
-
-    .play-btn:hover {
-        transform: scale(1.05);
-        background-color: var(--surface-3);
-    }
-
-    .play-btn:active {
-        transform: scale(0.95);
-    }
-
-    :global([data-theme="kami"]) .play-btn {
-        box-shadow: 4px 4px 12px var(--shadow-color);
-        border: 1px solid var(--border-subtle);
-    }
-</style>

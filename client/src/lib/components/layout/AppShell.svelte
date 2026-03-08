@@ -20,11 +20,7 @@
 <svelte:window bind:innerWidth />
 
 <div
-    class="app-shell"
-    class:is-mobile={isMobile}
-    class:theme-sumi={isSumi}
-    class:theme-kami={isKami}
-    class:theme-mori={isMori}
+    class="flex min-h-screen w-full box-border pl-[env(safe-area-inset-left,0px)] pr-[env(safe-area-inset-right,0px)]"
 >
     <!-- Navigation Layer -->
     {#if isMobile}
@@ -38,57 +34,19 @@
     {/if}
 
     <!-- Main Content Layer -->
-    <main class="main-content">
+    <main
+        class={`flex-1 w-full min-w-0 transition-[padding] duration-300 ease-[cubic-bezier(0.16,1,0.3,1)] ${
+            isMobile
+                ? "pb-[calc(56px+env(safe-area-inset-bottom,0px)+var(--space-6))] pt-[env(safe-area-inset-top,0px)]"
+                : isSumi
+                  ? "pt-[calc(56px+env(safe-area-inset-top,0px))] pb-[env(safe-area-inset-bottom,0px)]"
+                  : isKami
+                    ? "pl-[260px] pt-[env(safe-area-inset-top,0px)] pb-[env(safe-area-inset-bottom,0px)]"
+                    : isMori
+                      ? "pb-[calc(72px+env(safe-area-inset-bottom,0px)+var(--space-6))] pt-[env(safe-area-inset-top,0px)]"
+                      : ""
+        }`}
+    >
         {@render children()}
     </main>
 </div>
-
-<style>
-    .app-shell {
-        display: flex;
-        min-height: 100vh;
-        width: 100%;
-        /* Apply safe areas to the absolute outer shell */
-        padding-left: env(safe-area-inset-left, 0px);
-        padding-right: env(safe-area-inset-right, 0px);
-        box-sizing: border-box;
-    }
-
-    .main-content {
-        flex: 1;
-        width: 100%;
-        min-width: 0;
-        transition: padding 300ms cubic-bezier(0.16, 1, 0.3, 1);
-    }
-
-    /* Padding logic based on Matrix */
-
-    /* Mobile: padding bottoms for BottomNav + Safe areas */
-    .is-mobile .main-content {
-        padding-bottom: calc(
-            56px + env(safe-area-inset-bottom, 0px) + var(--space-6)
-        );
-        padding-top: env(safe-area-inset-top, 0px);
-    }
-
-    /* Tablet/Desktop: Sumi pad top */
-    .app-shell:not(.is-mobile).theme-sumi .main-content {
-        padding-top: calc(56px + env(safe-area-inset-top, 0px));
-        padding-bottom: env(safe-area-inset-bottom, 0px);
-    }
-
-    /* Tablet/Desktop: Kami pad left */
-    .app-shell:not(.is-mobile).theme-kami .main-content {
-        padding-left: 260px; /* Width of SideNav */
-        padding-top: env(safe-area-inset-top, 0px);
-        padding-bottom: env(safe-area-inset-bottom, 0px);
-    }
-
-    /* Tablet/Desktop: Mori pad bottom for FloatingNav */
-    .app-shell:not(.is-mobile).theme-mori .main-content {
-        padding-bottom: calc(
-            72px + env(safe-area-inset-bottom, 0px) + var(--space-6)
-        );
-        padding-top: env(safe-area-inset-top, 0px);
-    }
-</style>

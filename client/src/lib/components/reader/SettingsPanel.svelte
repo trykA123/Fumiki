@@ -19,6 +19,14 @@
     function applyStyles() {
         if (!view || !view.renderer || !view.renderer.setStyles) return;
 
+        // Get dynamic theme colors from the document body to pass to the iframe
+        const computedStyles = window.getComputedStyle(document.body);
+        const textColor =
+            computedStyles.getPropertyValue("--text-primary").trim() ||
+            "inherit";
+        const accentColor =
+            computedStyles.getPropertyValue("--accent").trim() || "inherit";
+
         // The background and foreground sync natively if foliate's iframe is transparent.
         // But if needed we can force color to inherit or currentColor via CSS inside the reader.
         const css = `
@@ -27,13 +35,16 @@
                 font-family: ${fontFamily} !important;
                 font-size: ${fontSize}px !important;
                 line-height: ${lineHeight} !important;
-                color: var(--text-base) !important;
+                color: ${textColor} !important;
             }
             body { 
                 background: transparent !important; 
             }
             p {
                 line-height: ${lineHeight} !important;
+            }
+            a {
+                color: ${accentColor} !important;
             }
         `;
         try {
@@ -50,29 +61,40 @@
 
 <!-- svelte-ignore a11y_click_events_have_key_events -->
 <!-- svelte-ignore a11y_no_static_element_interactions -->
-<div class="settings-overlay" onclick={onClose}>
+<div
+    class="fixed inset-0 bg-black/50 z-[100] flex justify-end pointer-events-auto"
+    onclick={onClose}
+>
     <!-- svelte-ignore a11y_click_events_have_key_events -->
     <!-- svelte-ignore a11y_no_static_element_interactions -->
     <div
-        class="settings-drawer"
+        class="w-[85vw] max-w-[400px] h-full bg-surface-1 flex flex-col shadow-[-2px_0_12px_rgba(0,0,0,0.2)]"
         transition:slide={{ duration: 250, axis: "x" }}
         onclick={(e) => e.stopPropagation()}
     >
-        <div class="header">
-            <h2>Display Settings</h2>
-            <button class="icon-btn" onclick={onClose} aria-label="Close">
+        <div
+            class="flex items-center justify-between p-4 border-b border-border-subtle"
+        >
+            <h2 class="text-lg font-semibold m-0">Display Settings</h2>
+            <button
+                class="bg-transparent border-none text-text-base cursor-pointer p-1 rounded-md flex items-center justify-center transition-colors duration-200 hover:bg-surface-2"
+                onclick={onClose}
+                aria-label="Close"
+            >
                 <Icon name="x" size={24} />
             </button>
         </div>
 
-        <div class="content">
-            <div class="setting-group">
-                <label for="font-family">Typography</label>
-                <div class="font-options">
+        <div class="flex-1 overflow-y-auto p-4 flex flex-col gap-6">
+            <div class="flex flex-col gap-2">
+                <label
+                    class="text-sm font-semibold text-text-muted uppercase tracking-[0.05em]"
+                    for="font-family">Typography</label
+                >
+                <div class="flex flex-col gap-2">
                     {#each fonts as font}
                         <button
-                            class="font-btn"
-                            class:active={fontFamily === font.value}
+                            class={`bg-surface-0 border border-border-subtle text-text-base p-3 rounded-md text-base cursor-pointer text-left transition-all duration-200 hover:border-border-strong ${fontFamily === font.value ? "!bg-[color-mix(in_srgb,var(--accent)_10%,transparent)] !border-accent !text-accent font-medium" : ""}`}
                             style="font-family: {font.value}"
                             onclick={() => (fontFamily = font.value)}
                         >
@@ -82,26 +104,38 @@
                 </div>
             </div>
 
-            <div class="setting-group">
-                <label for="font-size">Font Size: {fontSize}px</label>
-                <div class="range-control">
-                    <span class="range-icon small">A</span>
+            <div class="flex flex-col gap-2">
+                <label
+                    class="text-sm font-semibold text-text-muted uppercase tracking-[0.05em]"
+                    for="font-size">Font Size: {fontSize}px</label
+                >
+                <div
+                    class="flex items-center gap-3 bg-surface-0 p-3 rounded-md border border-border-subtle"
+                >
+                    <span class="text-text-muted font-medium text-sm">A</span>
                     <input
+                        class="flex-1 m-0 accent-[var(--accent)]"
                         type="range"
                         id="font-size"
                         min="14"
                         max="32"
                         bind:value={fontSize}
                     />
-                    <span class="range-icon large">A</span>
+                    <span class="text-text-muted font-medium text-lg">A</span>
                 </div>
             </div>
 
-            <div class="setting-group">
-                <label for="line-height">Line Height: {lineHeight}</label>
-                <div class="range-control">
-                    <span class="range-icon small">↕</span>
+            <div class="flex flex-col gap-2">
+                <label
+                    class="text-sm font-semibold text-text-muted uppercase tracking-[0.05em]"
+                    for="line-height">Line Height: {lineHeight}</label
+                >
+                <div
+                    class="flex items-center gap-3 bg-surface-0 p-3 rounded-md border border-border-subtle"
+                >
+                    <span class="text-text-muted font-medium text-sm">↕</span>
                     <input
+                        class="flex-1 m-0 accent-[var(--accent)]"
                         type="range"
                         id="line-height"
                         min="1.0"
@@ -109,154 +143,14 @@
                         step="0.1"
                         bind:value={lineHeight}
                     />
-                    <span class="range-icon large">↕</span>
+                    <span class="text-text-muted font-medium text-lg">↕</span>
                 </div>
             </div>
 
-            <p class="theme-hint">
+            <p class="text-xs text-text-muted text-center mt-auto py-4">
                 Theme colors map automatically from Fumiki to the reader
                 background.
             </p>
         </div>
     </div>
 </div>
-
-<style>
-    .settings-overlay {
-        position: fixed;
-        inset: 0;
-        background: rgba(0, 0, 0, 0.5);
-        z-index: 100;
-        display: flex;
-        justify-content: flex-end; /* right side */
-        pointer-events: auto;
-    }
-
-    .settings-drawer {
-        width: 85vw;
-        max-width: 400px;
-        height: 100%;
-        background: var(--surface-1);
-        display: flex;
-        flex-direction: column;
-        box-shadow: -2px 0 12px rgba(0, 0, 0, 0.2);
-    }
-
-    .header {
-        display: flex;
-        align-items: center;
-        justify-content: space-between;
-        padding: var(--space-4);
-        border-bottom: 1px solid var(--border-subtle);
-    }
-
-    .header h2 {
-        font-size: var(--text-lg);
-        font-weight: 600;
-        margin: 0;
-    }
-
-    .icon-btn {
-        background: transparent;
-        border: none;
-        color: var(--text-base);
-        cursor: pointer;
-        padding: var(--space-1);
-        border-radius: var(--radius-md);
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        transition: background-color var(--transition-base);
-    }
-
-    .icon-btn:hover {
-        background-color: var(--surface-2);
-    }
-
-    .content {
-        flex: 1;
-        overflow-y: auto;
-        padding: var(--space-4);
-        display: flex;
-        flex-direction: column;
-        gap: var(--space-6);
-    }
-
-    .setting-group {
-        display: flex;
-        flex-direction: column;
-        gap: var(--space-2);
-    }
-
-    .setting-group label {
-        font-size: var(--text-sm);
-        font-weight: 600;
-        color: var(--text-muted);
-        text-transform: uppercase;
-        letter-spacing: 0.05em;
-    }
-
-    .font-options {
-        display: flex;
-        flex-direction: column;
-        gap: var(--space-2);
-    }
-
-    .font-btn {
-        background: var(--surface-0);
-        border: 1px solid var(--border-subtle);
-        color: var(--text-base);
-        padding: var(--space-3);
-        border-radius: var(--radius-md);
-        font-size: var(--text-base);
-        cursor: pointer;
-        text-align: left;
-        transition: all var(--transition-base);
-    }
-
-    .font-btn:hover {
-        border-color: var(--border-strong);
-    }
-
-    .font-btn.active {
-        background: color-mix(in srgb, var(--accent) 10%, transparent);
-        border-color: var(--accent);
-        color: var(--accent);
-        font-weight: 500;
-    }
-
-    .range-control {
-        display: flex;
-        align-items: center;
-        gap: var(--space-3);
-        background: var(--surface-0);
-        padding: var(--space-3);
-        border-radius: var(--radius-md);
-        border: 1px solid var(--border-subtle);
-    }
-
-    .range-icon {
-        color: var(--text-muted);
-        font-weight: 500;
-    }
-    .range-icon.small {
-        font-size: var(--text-sm);
-    }
-    .range-icon.large {
-        font-size: var(--text-lg);
-    }
-
-    input[type="range"] {
-        flex: 1;
-        margin: 0;
-        accent-color: var(--accent);
-    }
-
-    .theme-hint {
-        font-size: var(--text-xs);
-        color: var(--text-muted);
-        text-align: center;
-        margin-top: auto;
-        padding: var(--space-4) 0;
-    }
-</style>

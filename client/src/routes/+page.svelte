@@ -31,7 +31,9 @@
   <title>Home - Fumiki</title>
 </svelte:head>
 
-<main class="home-page">
+<main
+  class="px-[var(--page-padding-mobile)] pb-[calc(var(--bottom-nav-height)+theme(spacing.8))] md:px-[var(--page-padding-tablet)] md:pb-12 max-w-[var(--page-max-width,1400px)] mx-3"
+>
   <Greeting
     userName={$auth.username || undefined}
     currentTitle={$progress.title}
@@ -39,18 +41,24 @@
   />
 
   {#if $library.loading && $library.books.length === 0}
-    <div class="loading-state">
-      <div class="spinner"></div>
+    <div
+      class="flex flex-col items-center justify-center py-16 text-text-muted"
+    >
+      <div
+        class="w-8 h-8 border-2 border-surface-2 border-t-accent rounded-full animate-spin mb-4"
+      ></div>
       <p>Syncing library...</p>
     </div>
   {:else}
     {#if continueReading.length > 0}
-      <section class="home-section scroll-section">
+      <section class="mb-10">
         <SectionHeader title="Continue Reading" icon="play" />
-        <div class="horizontal-scroll">
-          <div class="scroll-track">
+        <div
+          class="mx-[calc(var(--page-padding-mobile)*-1)] px-[var(--page-padding-mobile)] overflow-x-auto overscroll-x-contain [scrollbar-width:none] [&::-webkit-scrollbar]:hidden"
+        >
+          <div class="flex gap-4 pb-4">
             {#each continueReading as book (book.id)}
-              <div class="scroll-item">
+              <div class="flex-none w-[140px] sm:w-[160px]">
                 <BookCoverCard {book} />
               </div>
             {/each}
@@ -59,8 +67,8 @@
       </section>
     {/if}
 
-    <div class="split-layout">
-      <section class="home-section master-section">
+    <div class="flex flex-col lg:flex-row lg:items-start gap-8">
+      <section class="mb-10 lg:mb-0 flex-1 min-w-0">
         <SectionHeader
           title="Recent Library"
           icon="library"
@@ -75,18 +83,24 @@
             {/each}
           </BookGrid>
         {:else}
-          <p class="empty-text">No books found in your library.</p>
+          <p
+            class="text-text-muted text-center py-12 bg-surface-1 rounded-lg text-sm"
+          >
+            No books found in your library.
+          </p>
         {/if}
       </section>
 
-      <section class="home-section detail-section">
+      <section
+        class="mb-10 lg:mb-0 w-full lg:w-[320px] shrink-0 lg:sticky lg:top-[calc(var(--top-nav-height)+theme(spacing.8))]"
+      >
         <SectionHeader title="Activity" icon="list" />
 
-        <div class="activity-list">
+        <div class="flex flex-col gap-2">
           {#if $progress.loading}
-            <div class="skeleton-activity"></div>
-            <div class="skeleton-activity"></div>
-            <div class="skeleton-activity"></div>
+            <div class="h-16 bg-surface-2 rounded-md animate-pulse"></div>
+            <div class="h-16 bg-surface-2 rounded-md animate-pulse"></div>
+            <div class="h-16 bg-surface-2 rounded-md animate-pulse"></div>
           {:else}
             <!-- Hardcoded placeholders for Phase 3: Knowledge Layer -->
             <ActivityItem
@@ -115,135 +129,3 @@
     </div>
   {/if}
 </main>
-
-<style>
-  .home-page {
-    padding: 0 var(--page-padding-mobile)
-      calc(var(--bottom-nav-height) + var(--space-8));
-    max-width: var(--page-max-width, 1400px);
-    margin: 0 var(--space-3);
-  }
-
-  /* Tablet and Desktop padding adjustments container query */
-  @media (min-width: 768px) {
-    .home-page {
-      padding: 0 var(--page-padding-tablet) var(--space-12);
-    }
-  }
-
-  .home-section {
-    margin-bottom: var(--space-10);
-  }
-
-  .horizontal-scroll {
-    margin: 0 calc(var(--page-padding-mobile) * -1); /* Full bleed on mobile */
-    padding: 0 var(--page-padding-mobile);
-    overflow-x: auto;
-    overscroll-behavior-x: contain;
-    scrollbar-width: none; /* Firefox */
-  }
-
-  .horizontal-scroll::-webkit-scrollbar {
-    display: none; /* Chrome/Safari */
-  }
-
-  .scroll-track {
-    display: flex;
-    gap: var(--space-4);
-    padding-bottom: var(--space-4);
-  }
-
-  .scroll-item {
-    flex: 0 0 140px; /* Fixed width for horizontal scrolling cards */
-  }
-
-  @media (min-width: 640px) {
-    .scroll-item {
-      flex: 0 0 160px;
-    }
-  }
-
-  .split-layout {
-    display: flex;
-    flex-direction: column;
-    gap: var(--space-8);
-  }
-
-  @media (min-width: 1024px) {
-    .split-layout {
-      flex-direction: row;
-      align-items: flex-start;
-    }
-
-    .master-section {
-      flex: 1;
-      min-width: 0; /* Prevent flex overflow */
-      margin-bottom: 0;
-    }
-
-    .detail-section {
-      width: 320px;
-      flex-shrink: 0;
-      position: sticky;
-      top: calc(var(--top-nav-height) + var(--space-8));
-      margin-bottom: 0;
-    }
-  }
-
-  .activity-list {
-    display: flex;
-    flex-direction: column;
-    gap: var(--space-2);
-  }
-
-  .loading-state {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    padding: var(--space-16) 0;
-    color: var(--text-muted);
-  }
-
-  .spinner {
-    width: 32px;
-    height: 32px;
-    border: 2px solid var(--surface-2);
-    border-top-color: var(--accent);
-    border-radius: var(--radius-full);
-    animation: spin 1s linear infinite;
-    margin-bottom: var(--space-4);
-  }
-
-  @keyframes spin {
-    to {
-      transform: rotate(360deg);
-    }
-  }
-
-  .skeleton-activity {
-    height: 64px;
-    background: var(--surface-2);
-    border-radius: var(--radius-md);
-    animation: pulse 2s infinite;
-  }
-
-  @keyframes pulse {
-    0%,
-    100% {
-      opacity: 1;
-    }
-    50% {
-      opacity: 0.5;
-    }
-  }
-
-  .empty-text {
-    color: var(--text-muted);
-    text-align: center;
-    padding: var(--space-12) 0;
-    background: var(--surface-1);
-    border-radius: var(--radius-lg);
-    font-size: var(--text-sm);
-  }
-</style>

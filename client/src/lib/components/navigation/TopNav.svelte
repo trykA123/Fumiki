@@ -9,26 +9,37 @@
     ];
 </script>
 
-<nav class="top-nav">
-    <div class="logo">
+<nav
+    class="fixed top-0 left-0 right-0 h-[56px] bg-surface-1/80 border-b border-border-subtle flex items-center justify-between px-7 pt-[env(safe-area-inset-top)] z-[var(--z-sticky,40)] backdrop-blur-md"
+>
+    <div
+        class="flex items-baseline gap-2 font-display font-bold text-[var(--heading-card-size)] text-text-primary"
+    >
         <span>Fumiki</span>
-        <span class="logo-kanji">文木</span>
+        <span class="text-accent font-normal">文木</span>
     </div>
 
-    <div class="nav-links">
+    <div class="flex gap-6">
         {#each items as item}
             <a
                 href={item.href}
-                class="nav-link"
-                class:active={page.url.pathname === item.href}
+                class={`text-[13px] no-underline font-semibold tracking-widest uppercase transition-colors duration-150 relative py-2 ${
+                    page.url.pathname === item.href
+                        ? 'text-text-primary after:content-[""] after:absolute after:-bottom-2 after:left-0 after:right-0 after:h-[2px] after:bg-accent'
+                        : "text-text-muted hover:text-text-primary"
+                }`}
             >
                 {item.name}
             </a>
         {/each}
     </div>
 
-    <div class="actions">
-        <a href="/settings" class="settings-link" aria-label="Settings">
+    <div class="flex items-center">
+        <a
+            href="/settings"
+            class="text-text-muted transition-colors duration-150 flex items-center justify-center hover:text-text-primary"
+            aria-label="Settings"
+        >
             <svg
                 xmlns="http://www.w3.org/2000/svg"
                 width="20"
@@ -48,90 +59,3 @@
         </a>
     </div>
 </nav>
-
-<style>
-    .top-nav {
-        position: fixed;
-        top: 0;
-        left: 0;
-        right: 0;
-        height: 56px;
-        background: var(--surface-1);
-        border-bottom: 1px solid var(--border-subtle);
-        display: flex;
-        align-items: center;
-        justify-content: space-between;
-        padding: 0 var(--space-7);
-        padding-top: env(safe-area-inset-top);
-        z-index: var(--z-sticky);
-        backdrop-filter: blur(12px);
-    }
-
-    .logo {
-        display: flex;
-        align-items: baseline;
-        gap: var(--space-2);
-        font-family: var(--font-display);
-        font-weight: 700;
-        font-size: var(--heading-card-size);
-        color: var(--text-primary);
-    }
-
-    .logo-kanji {
-        color: var(--accent);
-        font-weight: 400;
-    }
-
-    .nav-links {
-        display: flex;
-        gap: var(--space-6);
-    }
-
-    .nav-link {
-        color: var(--text-muted);
-        text-decoration: none;
-        font-size: 13px;
-        font-weight: 600;
-        letter-spacing: 0.1em;
-        text-transform: uppercase;
-        transition: color 150ms;
-        position: relative;
-        padding: var(--space-2) 0;
-    }
-
-    .nav-link:hover {
-        color: var(--text-primary);
-    }
-
-    .nav-link.active {
-        color: var(--text-primary);
-    }
-
-    /* Sumi line under active link */
-    .nav-link.active::after {
-        content: "";
-        position: absolute;
-        bottom: -8px;
-        left: 0;
-        right: 0;
-        height: 2px;
-        background: var(--accent);
-    }
-
-    .actions {
-        display: flex;
-        align-items: center;
-    }
-
-    .settings-link {
-        color: var(--text-muted);
-        transition: color 150ms;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-    }
-
-    .settings-link:hover {
-        color: var(--text-primary);
-    }
-</style>

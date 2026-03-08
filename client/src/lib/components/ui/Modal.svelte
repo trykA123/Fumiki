@@ -47,94 +47,37 @@
 <!-- svelte-ignore a11y_no_noninteractive_element_interactions -->
 <dialog
     bind:this={dialog}
-    class="modal {className}"
+    class={`p-0 bg-transparent border-none max-w-[480px] w-full m-auto backdrop:bg-[hsl(0_0%_0%/0.5)] backdrop:z-[var(--z-modal)] ${className}`}
     onclose={closeDialog}
     onclick={handleBackdropClick}
 >
     <div
-        class="modal-content"
+        class="bg-surface-1 border border-border-medium rounded-lg p-7 shadow-[0_16px_48px_var(--shadow-color)] relative root-sumi:rounded-none root-kami:shadow-[0_20px_60px_var(--shadow-color)] root-kami:bg-transparent root-mori:border-none root-mori:shadow-[0_16px_48px_var(--shadow-color),0_0_0_1px_hsl(145_12%_40%/0.04)]"
         onclick={(e) => e.stopPropagation()}
         role="document"
     >
+        <!-- Kami noise texture -->
+        <div
+            class="absolute inset-0 pointer-events-none rounded-inherit z-[-1] hidden root-kami:block bg-surface-1"
+            style="background-image: url(&quot;data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='200' height='200'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.03'/%3E%3C/svg%3E&quot;);"
+        ></div>
+
         {#if title}
-            <h2 class="modal-title">{title}</h2>
+            <h2
+                class="font-display text-[var(--heading-card-size)] font-[var(--heading-card-weight)] mb-4 text-text-primary"
+            >
+                {title}
+            </h2>
         {/if}
 
-        <div class="modal-body">
+        <div class="mb-6 text-text-secondary leading-[1.6] last:mb-0">
             {@render children()}
         </div>
 
         {#if actions}
-            <div class="modal-actions">
+            <div class="flex gap-3 justify-end relative z-10">
                 {@render actions()}
             </div>
         {/if}
     </div>
 </dialog>
-
-<style>
-    .modal {
-        padding: 0;
-        background: transparent;
-        border: none;
-        max-width: 480px;
-        width: 100%;
-        margin: auto;
-    }
-
-    .modal::backdrop {
-        background: hsl(0 0% 0% / 0.5);
-        z-index: var(--z-modal);
-    }
-
-    .modal-content {
-        background: var(--surface-1);
-        border: 1px solid var(--border-medium);
-        border-radius: var(--radius-lg);
-        padding: var(--space-7);
-        box-shadow: 0 16px 48px var(--shadow-color);
-    }
-
-    .modal-title {
-        font-family: var(--font-display);
-        font-size: var(--heading-card-size);
-        font-weight: var(--heading-card-weight);
-        margin-bottom: var(--space-4);
-        color: var(--text-primary);
-    }
-
-    .modal-body {
-        margin-bottom: var(--space-6);
-        color: var(--text-secondary);
-        line-height: 1.6;
-    }
-
-    .modal-body:last-child {
-        margin-bottom: 0;
-    }
-
-    .modal-actions {
-        display: flex;
-        gap: var(--space-3);
-        justify-content: flex-end;
-    }
-
-    /* Theme: Sumi Overrides */
-    :global([data-theme="sumi"]) .modal-content {
-        border-radius: 0;
-    }
-
-    /* Theme: Kami Overrides */
-    :global([data-theme="kami"]) .modal-content {
-        box-shadow: 0 20px 60px var(--shadow-color);
-        background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='200' height='200'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.03'/%3E%3C/svg%3E");
-    }
-
-    /* Theme: Mori Overrides */
-    :global([data-theme="mori"]) .modal-content {
-        border: none;
-        box-shadow:
-            0 16px 48px var(--shadow-color),
-            0 0 0 1px hsl(145 12% 40% / 0.04);
-    }
-</style>

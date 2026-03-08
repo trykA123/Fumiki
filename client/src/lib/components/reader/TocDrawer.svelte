@@ -19,38 +19,47 @@
 
 <!-- svelte-ignore a11y_click_events_have_key_events -->
 <!-- svelte-ignore a11y_no_static_element_interactions -->
-<div class="toc-overlay" onclick={onClose}>
+<div
+    class="fixed inset-0 bg-black/50 z-[100] flex pointer-events-auto"
+    onclick={onClose}
+>
     <!-- svelte-ignore a11y_click_events_have_key_events -->
     <!-- svelte-ignore a11y_no_static_element_interactions -->
     <div
-        class="toc-drawer"
+        class="w-[85vw] max-w-[400px] h-full bg-surface-1 flex flex-col shadow-[2px_0_12px_rgba(0,0,0,0.2)]"
         transition:slide={{ duration: 250, axis: "x" }}
         onclick={(e) => e.stopPropagation()}
     >
-        <div class="header">
-            <h2>Table of Contents</h2>
-            <button class="icon-btn" onclick={onClose} aria-label="Close">
+        <div
+            class="flex items-center justify-between p-4 border-b border-border-subtle"
+        >
+            <h2 class="text-lg font-semibold m-0">Table of Contents</h2>
+            <button
+                class="bg-transparent border-none text-text-base cursor-pointer p-1 flex items-center justify-center rounded-md hover:bg-surface-2"
+                onclick={onClose}
+                aria-label="Close"
+            >
                 <Icon name="x" size={24} />
             </button>
         </div>
 
-        <div class="content">
+        <div class="flex-1 overflow-y-auto py-2 px-0">
             {#if toc && toc.length > 0}
-                <ul class="toc-list">
+                <ul class="list-none m-0 p-0">
                     {#each toc as item}
                         <li>
                             <button
-                                class="toc-item"
+                                class="w-full text-left bg-transparent border-t-0 border-x-0 border-b border-border-subtle px-4 py-3 text-base text-text-base cursor-pointer transition-colors duration-200 hover:bg-surface-2"
                                 onclick={(e) => handleNav(item, e)}
                             >
                                 {item.label || "Unknown Chapter"}
                             </button>
                             {#if item.subitems && item.subitems.length > 0}
-                                <ul class="toc-sublist">
+                                <ul class="list-none m-0 p-0">
                                     {#each item.subitems as subitem}
                                         <li>
                                             <button
-                                                class="toc-item sub"
+                                                class="w-full text-left bg-transparent border-t-0 border-x-0 border-b border-border-subtle py-3 pr-4 pl-8 text-sm text-text-muted cursor-pointer transition-colors duration-200 hover:bg-surface-2"
                                                 onclick={(e) =>
                                                     handleNav(subitem, e)}
                                             >
@@ -64,103 +73,10 @@
                     {/each}
                 </ul>
             {:else}
-                <div class="empty-state">
+                <div class="p-8 text-center text-text-muted">
                     <p>No chapters found.</p>
                 </div>
             {/if}
         </div>
     </div>
 </div>
-
-<style>
-    .toc-overlay {
-        position: fixed;
-        inset: 0;
-        background: rgba(0, 0, 0, 0.5);
-        z-index: 100;
-        display: flex;
-        pointer-events: auto;
-    }
-
-    .toc-drawer {
-        width: 85vw;
-        max-width: 400px;
-        height: 100%;
-        background: var(--surface-1);
-        display: flex;
-        flex-direction: column;
-        box-shadow: 2px 0 12px rgba(0, 0, 0, 0.2);
-    }
-
-    .header {
-        display: flex;
-        align-items: center;
-        justify-content: space-between;
-        padding: var(--space-4);
-        border-bottom: 1px solid var(--border-subtle);
-    }
-
-    .header h2 {
-        font-size: var(--text-lg);
-        font-weight: 600;
-        margin: 0;
-    }
-
-    .icon-btn {
-        background: transparent;
-        border: none;
-        color: var(--text-base);
-        cursor: pointer;
-        padding: var(--space-1);
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        border-radius: var(--radius-md);
-    }
-
-    .icon-btn:hover {
-        background-color: var(--surface-2);
-    }
-
-    .content {
-        flex: 1;
-        overflow-y: auto;
-        padding: var(--space-2) 0;
-    }
-
-    .toc-list,
-    .toc-sublist {
-        list-style: none;
-        margin: 0;
-        padding: 0;
-    }
-
-    .toc-item {
-        width: 100%;
-        text-align: left;
-        background: transparent;
-        border: none;
-        padding: var(--space-3) var(--space-4);
-        font-size: var(--text-base);
-        color: var(--text-base);
-        cursor: pointer;
-        transition: background-color var(--transition-base);
-        border-bottom: 1px solid var(--border-subtle);
-    }
-
-    .toc-item:hover {
-        background-color: var(--surface-2);
-    }
-
-    .toc-item.sub {
-        padding-left: var(--space-8);
-        font-size: var(--text-sm);
-        color: var(--text-muted);
-    }
-
-    .empty-state {
-        padding: var(--space-8);
-        text-align: center;
-        color: var(--text-muted);
-    }
-</style>

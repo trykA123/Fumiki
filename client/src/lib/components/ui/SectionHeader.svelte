@@ -12,59 +12,19 @@
     } = $props();
 </script>
 
-<div class="section-header {className}">
-    <h2 class="section-title">{title}</h2>
+<div
+    class={`flex items-baseline justify-between pb-2 border-b border-dashed border-border-medium ${className}`}
+>
+    <h2
+        class="font-display text-[var(--heading-section-size)] font-[var(--heading-section-weight)] tracking-[var(--heading-section-letter-spacing)] text-text-primary root-sumi:before:content-[''] root-sumi:before:inline-block root-sumi:before:w-4 root-sumi:before:h-px root-sumi:before:bg-accent root-sumi:before:mr-3 root-sumi:before:align-middle root-sumi:before:opacity-50 root-kami:before:content-['—_'] root-kami:before:text-text-muted root-kami:before:font-light"
+    >
+        {title}
+    </h2>
     {#if href}
-        <a {href} class="section-link">{linkText}</a>
+        <a
+            {href}
+            class="text-[var(--body-sm-size)] text-text-muted no-underline font-medium cursor-pointer transition-colors duration-150 hover:text-accent"
+            >{linkText}</a
+        >
     {/if}
 </div>
-
-<style>
-    .section-header {
-        display: flex;
-        align-items: baseline;
-        justify-content: space-between;
-        padding-bottom: var(--space-2);
-        border-bottom: 1px dashed var(--border-medium);
-    }
-
-    .section-title {
-        font-family: var(--font-display);
-        font-size: var(--heading-section-size);
-        font-weight: var(--heading-section-weight);
-        letter-spacing: var(--heading-section-letter-spacing);
-        color: var(--text-primary);
-    }
-
-    .section-link {
-        font-size: var(--body-sm-size);
-        color: var(--text-muted);
-        text-decoration: none;
-        font-weight: 500;
-        cursor: pointer;
-        transition: color 150ms;
-    }
-
-    .section-link:hover {
-        color: var(--accent);
-    }
-
-    /* Theme: Sumi - sharp horizontal line */
-    :global([data-theme="sumi"]) .section-title::before {
-        content: "";
-        display: inline-block;
-        width: 16px;
-        height: 1px;
-        background: var(--accent);
-        margin-right: var(--space-3);
-        vertical-align: middle;
-        opacity: 0.5;
-    }
-
-    /* Theme: Kami - Em dash */
-    :global([data-theme="kami"]) .section-title::before {
-        content: "— ";
-        color: var(--text-muted);
-        font-weight: 300;
-    }
-</style>

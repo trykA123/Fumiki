@@ -5,10 +5,12 @@
     let {
         title,
         onToggleToc,
+        onToggleNotes,
         onToggleSettings,
     }: {
         title: string;
         onToggleToc: () => void;
+        onToggleNotes: () => void;
         onToggleSettings: () => void;
     } = $props();
 
@@ -24,11 +26,15 @@
 <!-- svelte-ignore a11y_click_events_have_key_events -->
 <!-- svelte-ignore a11y_no_static_element_interactions -->
 <div
-    class="reader-toolbar"
+    class="fixed top-0 inset-x-0 h-14 bg-surface-0 text-text-base flex items-center justify-between px-2 pt-[env(safe-area-inset-top)] pb-0 shadow-[0_4px_12px_rgba(0,0,0,0.1)] z-50 pointer-events-auto"
     transition:slide={{ duration: 250, axis: "y" }}
     onclick={(e) => e.stopPropagation()}
 >
-    <button class="icon-btn" onclick={goBack} aria-label="Go Back">
+    <button
+        class="bg-transparent border-none text-text-base w-10 h-10 rounded-full flex items-center justify-center cursor-pointer transition-colors duration-200 hover:bg-surface-2"
+        onclick={goBack}
+        aria-label="Go Back"
+    >
         <svg
             xmlns="http://www.w3.org/2000/svg"
             width="24"
@@ -42,13 +48,17 @@
         >
     </button>
 
-    <div class="title-container">
-        <h1 class="title">{title}</h1>
+    <div class="flex-1 overflow-hidden mx-4 text-center">
+        <h1
+            class="font-serif text-base font-medium whitespace-nowrap overflow-hidden text-ellipsis m-0"
+        >
+            {title}
+        </h1>
     </div>
 
-    <div class="actions">
+    <div class="flex gap-2">
         <button
-            class="icon-btn"
+            class="bg-transparent border-none text-text-base w-10 h-10 rounded-full flex items-center justify-center cursor-pointer transition-colors duration-200 hover:bg-surface-2"
             onclick={onToggleToc}
             aria-label="Table of Contents"
         >
@@ -81,7 +91,14 @@
             >
         </button>
         <button
-            class="icon-btn"
+            class="bg-transparent border-none text-text-base w-10 h-10 rounded-full flex items-center justify-center cursor-pointer transition-colors duration-200 hover:bg-surface-2"
+            onclick={onToggleNotes}
+            aria-label="Notes & Highlights"
+        >
+            <Icon name="edit" size={20} />
+        </button>
+        <button
+            class="bg-transparent border-none text-text-base w-10 h-10 rounded-full flex items-center justify-center cursor-pointer transition-colors duration-200 hover:bg-surface-2"
             onclick={onToggleSettings}
             aria-label="Settings"
         >
@@ -89,62 +106,3 @@
         </button>
     </div>
 </div>
-
-<style>
-    .reader-toolbar {
-        position: fixed;
-        top: 0;
-        left: 0;
-        right: 0;
-        height: 56px;
-        background: var(--surface-0);
-        color: var(--text-base);
-        display: flex;
-        align-items: center;
-        justify-content: space-between;
-        padding: 0 var(--space-2) env(safe-area-inset-top) var(--space-2);
-        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
-        z-index: 50;
-        pointer-events: auto;
-    }
-
-    .title-container {
-        flex: 1;
-        overflow: hidden;
-        margin: 0 var(--space-4);
-        text-align: center;
-    }
-
-    .title {
-        font-family: var(--font-serif);
-        font-size: var(--text-base);
-        font-weight: 500;
-        white-space: nowrap;
-        overflow: hidden;
-        text-overflow: ellipsis;
-        margin: 0;
-    }
-
-    .actions {
-        display: flex;
-        gap: var(--space-2);
-    }
-
-    .icon-btn {
-        background: transparent;
-        border: none;
-        color: var(--text-base);
-        width: 40px;
-        height: 40px;
-        border-radius: 50%;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        cursor: pointer;
-        transition: background-color var(--transition-base);
-    }
-
-    .icon-btn:hover {
-        background-color: var(--surface-2);
-    }
-</style>

@@ -10,43 +10,26 @@
         class?: string;
         children: Snippet;
     } = $props();
+    const baseClass =
+        "inline-flex items-center px-[12px] py-[5px] font-body text-[var(--text-xs)] font-semibold tracking-[0.02em] rounded-full leading-none root-sumi:rounded-[2px]";
+
+    const variantClasses = {
+        default: "bg-surface-2 text-text-secondary border border-border-subtle",
+        accent: "bg-accent text-text-inverse",
+        success: "bg-success text-text-inverse",
+    };
+
+    const computedClass = $derived(
+        `
+        ${baseClass}
+        ${variantClasses[variant]}
+        ${className}
+    `
+            .replace(/\s+/g, " ")
+            .trim(),
+    );
 </script>
 
-<span class="badge badge-{variant} {className}">
+<span class={computedClass}>
     {@render children()}
 </span>
-
-<style>
-    .badge {
-        display: inline-flex;
-        align-items: center;
-        padding: 5px 12px;
-        font-family: var(--font-body);
-        font-size: var(--text-xs);
-        font-weight: 600;
-        letter-spacing: 0.02em;
-        border-radius: 100px; /* default pill */
-        line-height: 1;
-    }
-
-    .badge-default {
-        background: var(--surface-2);
-        color: var(--text-secondary);
-        border: 1px solid var(--border-subtle);
-    }
-
-    .badge-accent {
-        background: var(--accent);
-        color: var(--text-inverse);
-    }
-
-    .badge-success {
-        background: var(--success);
-        color: var(--text-inverse);
-    }
-
-    /* Themes */
-    :global([data-theme="sumi"]) .badge {
-        border-radius: 2px;
-    }
-</style>

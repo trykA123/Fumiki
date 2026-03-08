@@ -14,170 +14,95 @@
     <title>Settings - Fumiki</title>
 </svelte:head>
 
-<div class="settings-page">
+<div class="px-6 max-w-[800px] mx-auto flex flex-col gap-6">
     <SectionHeader title="Connection" />
 
-    <Card variant="default" class="connection-card">
-        <div class="status-row">
-            <div class="info">
-                <h3>AudioBookShelf Server</h3>
-                <p class="monospace">{$auth.absHost || "Unknown"}</p>
+    <Card variant="default">
+        <div class="flex justify-between items-center py-4">
+            <div>
+                <h3 class="text-sm text-text-muted mb-1 font-medium">
+                    AudioBookShelf Server
+                </h3>
+                <p class="font-mono text-base text-text-primary">
+                    {$auth.absHost || "Unknown"}
+                </p>
             </div>
-            <div class="badge" class:active={$auth.isAuthenticated}>
+            <div
+                class={`px-3 py-1 rounded-full text-xs font-semibold uppercase tracking-wider ${$auth.isAuthenticated ? "bg-success/20 text-success border border-success/40" : "bg-surface-2 text-text-muted"}`}
+            >
                 {$auth.isAuthenticated ? "Connected" : "Disconnected"}
             </div>
         </div>
 
-        <div class="user-row">
-            <div class="info">
-                <h3>Logged in as</h3>
-                <p>{$auth.username || "System"}</p>
+        <div
+            class="flex justify-between items-center py-4 border-t border-border-subtle"
+        >
+            <div>
+                <h3 class="text-sm text-text-muted mb-1 font-medium">
+                    Logged in as
+                </h3>
+                <p class="text-base text-text-primary">
+                    {$auth.username || "System"}
+                </p>
             </div>
             <Button variant="danger" size="sm" onclick={() => auth.logout()}
                 >Disconnect</Button
+            >
+        </div>
+
+        <div
+            class="flex items-center justify-between py-4 border-t border-border-subtle"
+        >
+            <div>
+                <h3 class="text-sm text-text-muted mb-1 font-medium">
+                    Artificial Intelligence
+                </h3>
+                <p class="text-base text-text-primary">
+                    Summary Generation via Ollama, OpenAI, or Anthropic
+                </p>
+            </div>
+            <Button variant="secondary" size="sm" href="/settings/ai"
+                >Configure</Button
             >
         </div>
     </Card>
 
     <SectionHeader title="Appearance" />
 
-    <Card variant="interactive" class="theme-card">
-        <div class="theme-selector">
+    <Card variant="interactive">
+        <div class="flex flex-col sm:flex-row gap-4 mb-4">
             <button
-                class="theme-btn"
-                class:active={$themeId === "sumi"}
+                class={`flex-1 bg-surface-0 border border-border-medium rounded-md p-4 flex flex-col items-center gap-2 cursor-pointer transition-all duration-200 text-text-primary hover:border-accent ${$themeId === "sumi" ? "border-accent bg-surface-accent shadow-[0_0_0_2px_var(--accent-glow-strong)]" : ""}`}
                 onclick={() => switchTheme("sumi")}
             >
-                <span class="swatch bg-sumi"></span>
+                <span
+                    class="w-8 h-8 rounded-full border border-border-strong bg-[#111111]"
+                ></span>
                 Sumi
             </button>
             <button
-                class="theme-btn"
-                class:active={$themeId === "kami"}
+                class={`flex-1 bg-surface-0 border border-border-medium rounded-md p-4 flex flex-col items-center gap-2 cursor-pointer transition-all duration-200 text-text-primary hover:border-accent ${$themeId === "kami" ? "border-accent bg-surface-accent shadow-[0_0_0_2px_var(--accent-glow-strong)]" : ""}`}
                 onclick={() => switchTheme("kami")}
             >
-                <span class="swatch bg-kami"></span>
+                <span
+                    class="w-8 h-8 rounded-full border border-border-strong bg-[#faf9f6]"
+                ></span>
                 Kami
             </button>
             <button
-                class="theme-btn"
-                class:active={$themeId === "mori"}
+                class={`flex-1 bg-surface-0 border border-border-medium rounded-md p-4 flex flex-col items-center gap-2 cursor-pointer transition-all duration-200 text-text-primary hover:border-accent ${$themeId === "mori" ? "border-accent bg-surface-accent shadow-[0_0_0_2px_var(--accent-glow-strong)]" : ""}`}
                 onclick={() => switchTheme("mori")}
             >
-                <span class="swatch bg-mori"></span>
+                <span
+                    class="w-8 h-8 rounded-full border border-border-strong bg-[#2a312b]"
+                ></span>
                 Mori
             </button>
         </div>
-        <p class="theme-desc">Current aesthetics: <em>{$theme.name}</em></p>
+        <p class="text-text-muted text-sm text-center">
+            Current aesthetics: <em class="not-italic font-medium"
+                >{$theme.name}</em
+            >
+        </p>
     </Card>
 </div>
-
-<style>
-    .settings-page {
-        padding: var(--space-6);
-        max-width: 800px;
-        margin: 0 auto;
-        display: flex;
-        flex-direction: column;
-        gap: var(--space-6);
-    }
-
-    .status-row,
-    .user-row {
-        display: flex;
-        justify-content: space-between;
-        align-items: center;
-        padding: var(--space-4) 0;
-    }
-
-    .user-row {
-        border-top: 1px solid var(--border-subtle);
-    }
-
-    .info h3 {
-        font-size: var(--text-sm);
-        color: var(--text-muted);
-        margin-bottom: var(--space-1);
-        font-weight: 500;
-    }
-
-    .info p {
-        font-size: var(--text-base);
-        color: var(--text-base);
-    }
-
-    .monospace {
-        font-family: var(--font-mono);
-    }
-
-    .badge {
-        padding: 4px 12px;
-        border-radius: 100px;
-        font-size: 12px;
-        font-weight: 600;
-        text-transform: uppercase;
-        letter-spacing: 0.05em;
-        background: var(--surface-2);
-        color: var(--text-muted);
-    }
-
-    .badge.active {
-        background: color-mix(in srgb, var(--success) 20%, transparent);
-        color: var(--success);
-        border: 1px solid color-mix(in srgb, var(--success) 40%, transparent);
-    }
-
-    .theme-selector {
-        display: flex;
-        gap: var(--space-4);
-        margin-bottom: var(--space-4);
-    }
-
-    .theme-btn {
-        flex: 1;
-        background: var(--surface-0);
-        border: 1px solid var(--border-medium);
-        border-radius: var(--radius-md);
-        padding: var(--space-4);
-        display: flex;
-        flex-direction: column;
-        align-items: center;
-        gap: var(--space-2);
-        cursor: pointer;
-        transition: all 200ms ease;
-        color: var(--text-base);
-    }
-
-    .theme-btn:hover {
-        border-color: var(--accent);
-    }
-
-    .theme-btn.active {
-        border-color: var(--accent);
-        background: var(--surface-accent);
-        box-shadow: 0 0 0 2px var(--accent-glow-strong);
-    }
-
-    .swatch {
-        width: 32px;
-        height: 32px;
-        border-radius: 50%;
-        border: 1px solid var(--border-strong);
-    }
-
-    .bg-sumi {
-        background: #111111;
-    }
-    .bg-kami {
-        background: #faf9f6;
-    }
-    .bg-mori {
-        background: #2a312b;
-    }
-
-    .theme-desc {
-        color: var(--text-muted);
-        font-size: var(--text-sm);
-        text-align: center;
-    }
-</style>

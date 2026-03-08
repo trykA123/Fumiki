@@ -16,67 +16,27 @@
     } = $props();
 </script>
 
-<div class="empty-state {className}">
+<div
+    class={`flex flex-col items-center justify-center text-center py-8 px-4 bg-surface-1 border border-dashed border-border-medium rounded-lg root-kami:bg-transparent root-mori:border-solid root-mori:border-surface-2 ${className}`}
+>
     {#if icon}
-        <div class="empty-icon {icon}"></div>
+        <div class={`text-[32px] text-text-muted mb-3 ${icon}`}></div>
     {/if}
-    <h3 class="empty-title">{title}</h3>
+    <h3
+        class="text-[var(--heading-card-size)] font-[var(--heading-card-weight)] text-text-primary mb-2"
+    >
+        {title}
+    </h3>
     {#if message}
-        <p class="empty-message">{message}</p>
+        <p
+            class="text-text-secondary text-[var(--body-size)] max-w-[400px] mb-4"
+        >
+            {message}
+        </p>
     {/if}
     {#if action}
-        <div class="empty-action">
+        <div class="flex justify-center">
             {@render action()}
         </div>
     {/if}
 </div>
-
-<style>
-    .empty-state {
-        display: flex;
-        flex-direction: column;
-        align-items: center;
-        justify-content: center;
-        text-align: center;
-        padding: var(--space-8) var(--space-4);
-        background: var(--surface-1);
-        border: 1px dashed var(--border-medium);
-        border-radius: var(--radius-lg);
-    }
-
-    /* Kami paper theme dashed override */
-    :global([data-theme="kami"]) .empty-state {
-        background: transparent;
-    }
-
-    /* Mori subtle gap override */
-    :global([data-theme="mori"]) .empty-state {
-        border-style: solid;
-        border-color: var(--surface-2);
-    }
-
-    .empty-icon {
-        font-size: 32px;
-        color: var(--text-muted);
-        margin-bottom: var(--space-3);
-    }
-
-    .empty-title {
-        font-size: var(--heading-card-size);
-        font-weight: var(--heading-card-weight);
-        color: var(--text-primary);
-        margin-bottom: var(--space-2);
-    }
-
-    .empty-message {
-        color: var(--text-secondary);
-        font-size: var(--body-size);
-        max-width: 400px;
-        margin-bottom: var(--space-4);
-    }
-
-    .empty-action {
-        display: flex;
-        justify-content: center;
-    }
-</style>

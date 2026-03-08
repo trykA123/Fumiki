@@ -9,9 +9,22 @@
     import SeekBar from "$lib/components/player/SeekBar.svelte";
     import SpeedSelector from "$lib/components/player/SpeedSelector.svelte";
     import SleepTimer from "$lib/components/player/SleepTimer.svelte";
-    import ChapterList from "$lib/components/library/ChapterList.svelte";
+    import BookmarkButton from "$lib/components/player/BookmarkButton.svelte";
+    import NoteEditorModal from "$lib/components/reader/NoteEditorModal.svelte";
+    import NotesDrawer from "$lib/components/reader/NotesDrawer.svelte";
+    import Icon from "$lib/components/Icon.svelte";
+
+    import { notesStore } from "$lib/stores/notes";
+    import { toast } from "$lib/stores/toast";
 
     let { data } = $props();
+
+    let notesVisible = $state(false);
+    let noteEditorVisible = $state(false);
+
+    onMount(() => {
+        notesStore.loadBookNotes(data.id);
+    });
 
     onMount(() => {
         // Only load if it's not already the active book playing
@@ -29,16 +42,48 @@
             goto("/library");
         }
     }
+
+    async function handleSaveNote(content: string) {
+        try {
+            await notesStore.createNote(
+                data.id,
+                "note", // Audio annotation
+                "audio",
+                {
+                    seconds: $player.currentTime,
+                    chapterTitle: $currentChapter?.title || "Unknown",
+                },
+                content,
+                "yellow",
+            );
+            toast.add("Note saved", "success");
+            noteEditorVisible = false;
+        } catch (e) {
+            // Handled
+        }
+    }
+
+    function navigateAudioNote(pos: number | any) {
+        const seconds = typeof pos === "number" ? pos : pos?.seconds;
+        if (typeof seconds === "number") {
+            player.seek(seconds);
+            notesVisible = false;
+        }
+    }
 </script>
 
 <svelte:head>
     <title>{$player.activeBook?.title || "Player"} - Fumiki</title>
 </svelte:head>
 
-<div class="player-page">
-    <div class="header">
+<div
+    class="fixed inset-0 bg-surface-0 z-[100] flex flex-col overflow-y-auto p-0"
+>
+    <div
+        class="absolute top-0 left-0 right-0 z-10 flex items-center justify-between p-4 shrink-0"
+    >
         <button
-            class="icon-btn minimize-btn"
+            class="bg-transparent border-none text-text-primary cursor-pointer p-2 rounded-full flex items-center justify-center transition-colors duration-200 hover:bg-surface-2"
             onclick={minimize}
             aria-label="Minimize player"
         >
@@ -54,281 +99,124 @@
                 stroke-linejoin="round"><path d="m6 9 6 6 6-6" /></svg
             >
         </button>
-        <div class="spacer"></div>
+        <div class="flex-1"></div>
+        <button
+            class="bg-transparent border-none text-text-primary cursor-pointer p-2 rounded-full flex items-center justify-center transition-colors duration-200 hover:bg-surface-2"
+            onclick={() => (notesVisible = true)}
+            aria-label="View Notes and Bookmarks"
+        >
+            <Icon name="list" size={24} />
+        </button>
     </div>
 
     {#if $player.activeBook}
-        <div class="player-content">
+        <div class="flex flex-col flex-1 w-full mb-8">
             <!-- Main Column (Cover + Controls) -->
-            <div class="main-column">
-                <div class="cover-wrapper">
+            <div class="flex flex-col items-center w-full mx-auto">
+                <div
+                    class="relative w-full flex flex-col items-center pt-[calc(theme(spacing.8)+32px)] px-4 pb-8 overflow-hidden rounded-b-[40px] shadow-md mb-8"
+                >
                     <img
                         src={`/api/abs/items/${$player.activeBook.id}/cover`}
-                        alt="Cover"
-                        class="cover shadow-lg"
+                        alt=""
+                        class="absolute inset-0 w-full h-full object-cover opacity/15 blur-[40px] saturate-150 scale-125 z-0"
+                        style="mask-image: linear-gradient(to bottom, rgba(0,0,0,1) 0%, rgba(0,0,0,0.8) 70%, rgba(0,0,0,0) 100%); -webkit-mask-image: linear-gradient(to bottom, rgba(0,0,0,1) 0%, rgba(0,0,0,0.8) 70%, rgba(0,0,0,0) 100%);"
+                        aria-hidden="true"
                     />
+
+                    <div
+                        class="relative z-10 flex flex-col items-center w-full max-w-[440px]"
+                    >
+                        <div
+                            class="w-full aspect-square max-w-[320px] rounded-lg overflow-hidden mb-6 shadow-[0_10px_30px_rgba(0,0,0,0.15)]"
+                        >
+                            <img
+                                src={`/api/abs/items/${$player.activeBook.id}/cover`}
+                                alt="Cover"
+                                class="w-full h-full object-cover"
+                            />
+                        </div>
+
+                        <div class="text-center mb-8 w-full">
+                            <h1
+                                class="font-display text-2xl font-semibold text-text-primary mb-1 line-clamp-2 leading-[1.2]"
+                            >
+                                {$player.activeBook.title}
+                            </h1>
+                            <p class="text-base text-text-muted">
+                                {$player.activeBook.author}
+                            </p>
+                            {#if $player.activeBook?.chapters && $player.activeBook.chapters.length > 0}
+                                <div
+                                    class="relative inline-flex items-center max-w-full mt-2"
+                                >
+                                    <select
+                                        class="mt-0 appearance-none border-none outline-none cursor-pointer pr-8 font-[inherit] w-full truncate transition-colors duration-200 text-sm text-accent font-medium inline-block bg-accent/10 hover:bg-accent/15 px-3 py-1 rounded-full focus-visible:outline-2 focus-visible:outline-accent focus-visible:outline-offset-2 [&>option]:text-text-primary [&>option]:bg-surface-1 [&>option]:font-normal"
+                                        value={$currentChapter?.start || 0}
+                                        onchange={(e) =>
+                                            player.seek(
+                                                Number(e.currentTarget.value),
+                                            )}
+                                        aria-label="Select chapter"
+                                    >
+                                        {#each $player.activeBook.chapters as chapter}
+                                            <option value={chapter.start}>
+                                                {chapter.title}
+                                            </option>
+                                        {/each}
+                                    </select>
+                                    <div
+                                        class="absolute right-3 pointer-events-none text-accent flex items-center justify-center"
+                                    >
+                                        <Icon name="chevron-down" size={16} />
+                                    </div>
+                                </div>
+                            {:else if $currentChapter}
+                                <p
+                                    class="text-sm text-accent mt-2 font-medium inline-block bg-accent/10 px-3 py-1 rounded-full"
+                                >
+                                    {$currentChapter.title}
+                                </p>
+                            {/if}
+                        </div>
+                    </div>
                 </div>
 
-                <div class="metadata">
-                    <h1 class="title">{$player.activeBook.title}</h1>
-                    <p class="author">{$player.activeBook.author}</p>
-                    {#if $currentChapter}
-                        <p class="chapter-info">
-                            {$currentChapter.title}
-                        </p>
-                    {/if}
-                </div>
-
-                <div class="playback-area">
+                <div
+                    class="w-full max-w-[440px] mx-auto px-4 flex flex-col gap-2"
+                >
                     <SeekBar />
                     <PlayerControls />
 
-                    <div class="secondary-controls">
+                    <div class="flex items-center justify-between mt-4">
                         <SpeedSelector />
                         <SleepTimer />
-                        <button class="bookmark-btn" aria-label="Add Bookmark">
-                            <svg
-                                xmlns="http://www.w3.org/2000/svg"
-                                width="20"
-                                height="20"
-                                viewBox="0 0 24 24"
-                                fill="none"
-                                stroke="currentColor"
-                                stroke-width="2"
-                                stroke-linecap="round"
-                                stroke-linejoin="round"
-                                ><path
-                                    d="m19 21-7-4-7 4V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2v16z"
-                                /></svg
-                            >
+                        <button
+                            class="bg-surface-2 border border-border-subtle text-text-primary w-10 h-10 rounded-full flex items-center justify-center cursor-pointer transition-all duration-200 hover:bg-surface-3 hover:border-border-strong active:scale-95"
+                            aria-label="Write Note"
+                            title="Write Note"
+                            onclick={() => (noteEditorVisible = true)}
+                        >
+                            <Icon name="edit" size={20} />
                         </button>
+                        <BookmarkButton bookId={data.id} />
                     </div>
                 </div>
             </div>
-
-            <!-- Side Column (Chapters) -->
-            <div class="side-column">
-                {#if $player.activeBook.chapters && $player.activeBook.chapters.length > 0}
-                    <div class="panel">
-                        <h2 class="panel-title">Chapters</h2>
-                        <div class="panel-scroll">
-                            <ChapterList
-                                chapters={$player.activeBook.chapters}
-                            />
-                        </div>
-                    </div>
-                {/if}
-            </div>
         </div>
     {/if}
+
+    {#if notesVisible}
+        <NotesDrawer
+            bookId={data.id}
+            onNavigate={navigateAudioNote}
+            onClose={() => (notesVisible = false)}
+        />
+    {/if}
+
+    <NoteEditorModal
+        visible={noteEditorVisible}
+        onSave={handleSaveNote}
+        onClose={() => (noteEditorVisible = false)}
+    />
 </div>
-
-<style>
-    .player-page {
-        position: fixed;
-        inset: 0;
-        background: var(--surface-0);
-        z-index: 100; /* Above everything */
-        display: flex;
-        flex-direction: column;
-        overflow-y: auto;
-        padding: var(--space-4) var(--space-4) var(--space-8);
-    }
-
-    .header {
-        display: flex;
-        align-items: center;
-        justify-content: space-between;
-        padding-bottom: var(--space-4);
-        flex-shrink: 0;
-    }
-
-    .minimize-btn {
-        background: transparent;
-        border: none;
-        color: var(--text-base);
-        cursor: pointer;
-        padding: var(--space-2);
-        border-radius: 50%;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        transition: background-color var(--transition-base);
-    }
-
-    .minimize-btn:hover {
-        background-color: var(--surface-2);
-    }
-
-    .player-content {
-        display: flex;
-        flex-direction: column;
-        gap: var(--space-8);
-        flex: 1;
-        max-width: 1000px;
-        margin: 0 auto;
-        width: 100%;
-    }
-
-    /* Tablet/Desktop split view */
-    @media (min-width: 768px) {
-        .player-content {
-            flex-direction: row;
-            align-items: flex-start;
-        }
-
-        .main-column {
-            flex: 1;
-            position: sticky;
-            top: 20px;
-        }
-
-        .side-column {
-            flex: 1;
-            height: calc(100vh - 120px);
-        }
-    }
-
-    .main-column {
-        display: flex;
-        flex-direction: column;
-        align-items: center;
-        width: 100%;
-        max-width: 440px;
-        margin: 0 auto;
-    }
-
-    .cover-wrapper {
-        width: 100%;
-        aspect-ratio: 1;
-        max-width: 320px;
-        border-radius: var(--radius-lg);
-        overflow: hidden;
-        margin-bottom: var(--space-6);
-        box-shadow: 0 10px 30px rgba(0, 0, 0, 0.15);
-    }
-
-    .cover {
-        width: 100%;
-        height: 100%;
-        object-fit: cover;
-    }
-
-    .metadata {
-        text-align: center;
-        margin-bottom: var(--space-8);
-        width: 100%;
-    }
-
-    .title {
-        font-family: var(--font-serif);
-        font-size: var(--text-2xl);
-        font-weight: 600;
-        color: var(--text-base);
-        margin-bottom: var(--space-1);
-        display: -webkit-box;
-        -webkit-line-clamp: 2;
-        -webkit-box-orient: vertical;
-        overflow: hidden;
-        line-height: 1.2;
-    }
-
-    .author {
-        font-size: var(--text-base);
-        color: var(--text-muted);
-    }
-
-    .chapter-info {
-        font-size: var(--text-sm);
-        color: var(--accent);
-        margin-top: var(--space-2);
-        font-weight: 500;
-        display: inline-block;
-        background: color-mix(in srgb, var(--accent) 10%, transparent);
-        padding: 4px 12px;
-        border-radius: var(--radius-full);
-    }
-
-    .playback-area {
-        width: 100%;
-        display: flex;
-        flex-direction: column;
-        gap: var(--space-2);
-    }
-
-    .secondary-controls {
-        display: flex;
-        align-items: center;
-        justify-content: space-between;
-        margin-top: var(--space-6);
-    }
-
-    .bookmark-btn {
-        background: transparent;
-        border: 1px solid var(--border-subtle);
-        color: var(--text-base);
-        cursor: pointer;
-        width: 36px;
-        height: 36px;
-        border-radius: var(--radius-md);
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        transition: all var(--transition-base);
-    }
-
-    .bookmark-btn:hover {
-        background-color: var(--surface-2);
-        border-color: var(--border-strong);
-    }
-
-    .bookmark-btn:active {
-        transform: scale(0.95);
-    }
-
-    .side-column {
-        width: 100%;
-        display: flex;
-        flex-direction: column;
-    }
-
-    .panel {
-        background: var(--surface-1);
-        border-radius: var(--radius-lg);
-        border: 1px solid var(--border-subtle);
-        padding: var(--space-4);
-        display: flex;
-        flex-direction: column;
-        height: 100%;
-    }
-
-    .panel-title {
-        font-size: var(--text-lg);
-        font-weight: 600;
-        color: var(--text-base);
-        margin-bottom: var(--space-4);
-        padding-bottom: var(--space-2);
-        border-bottom: 1px solid var(--border-subtle);
-    }
-
-    .panel-scroll {
-        overflow-y: auto;
-        flex: 1;
-        /* Custom scrollbar for panel */
-        scrollbar-width: thin;
-        scrollbar-color: var(--surface-3) transparent;
-    }
-
-    .panel-scroll::-webkit-scrollbar {
-        width: 4px;
-    }
-
-    .panel-scroll::-webkit-scrollbar-track {
-        background: transparent;
-    }
-
-    .panel-scroll::-webkit-scrollbar-thumb {
-        background-color: var(--surface-3);
-        border-radius: var(--radius-full);
-    }
-</style>

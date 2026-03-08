@@ -26,132 +26,55 @@
 
     const isLink = $derived(!!href);
     const tag = $derived(isLink ? "a" : "button");
+
+    const baseClass =
+        "font-body font-semibold border-none inline-flex items-center justify-center gap-2 transition-all duration-200 ease-in-out rounded no-underline root-sumi:text-[11px] root-sumi:font-bold root-sumi:tracking-[0.12em] root-sumi:uppercase cursor-pointer disabled:opacity-40 disabled:cursor-not-allowed disabled:transform-none disabled:shadow-none";
+
+    // Compute size classes
+    const sizeClasses = {
+        sm: "px-[14px] py-[7px] text-[12px] min-h-[32px]",
+        md: "px-[22px] py-[10px] text-[13px] min-h-[40px]",
+        lg: "px-[28px] py-[13px] text-[15px] min-h-[46px]",
+    };
+
+    const iconSizeClasses = {
+        sm: "w-[32px] h-[32px] p-0 min-h-0",
+        md: "w-[40px] h-[40px] p-0 min-h-0",
+        lg: "w-[46px] h-[46px] p-0 min-h-0",
+    };
+
+    // Compute variant classes
+    const variantClasses = {
+        primary:
+            "bg-accent text-text-inverse hover:not(:disabled):bg-accent-hover hover:not(:disabled):-translate-y-[1px] hover:not(:disabled):shadow-[0_4px_16px_var(--accent-glow-strong)] active:not(:disabled):translate-y-0",
+        secondary:
+            "bg-surface-3 text-text-primary hover:not(:disabled):bg-surface-4",
+        ghost: "bg-transparent text-text-secondary border border-border-medium hover:not(:disabled):bg-surface-2 hover:not(:disabled):text-text-primary hover:not(:disabled):border-border-strong",
+        danger: "bg-error text-white hover:not(:disabled):bg-[hsl(0_84%_50%)]",
+        icon: "bg-transparent text-text-secondary hover:not(:disabled):bg-surface-2 hover:not(:disabled):text-text-primary root-sumi:normal-case root-sumi:tracking-normal root-sumi:font-semibold root-sumi:text-[length:inherit]", // Reset sumi overrides for icons
+    };
+
+    const computedClass = $derived(
+        `
+        ${baseClass} 
+        ${variant === "icon" ? iconSizeClasses[size] : sizeClasses[size]} 
+        ${variantClasses[variant]} 
+        ${className}
+    `
+            .replace(/\s+/g, " ")
+            .trim(),
+    );
 </script>
 
+<!-- svelte-ignore a11y_no_static_element_interactions -->
+<!-- svelte-ignore a11y_click_events_have_key_events -->
 <svelte:element
     this={tag}
     {href}
     {type}
     {disabled}
     {onclick}
-    class="btn btn-{variant} btn-{size} {className}"
+    class={computedClass}
 >
     {@render children()}
 </svelte:element>
-
-<style>
-    .btn {
-        font-family: var(--font-body);
-        font-weight: 600;
-        border: none;
-        cursor: pointer;
-        display: inline-flex;
-        align-items: center;
-        justify-content: center;
-        gap: var(--space-2);
-        transition: all 200ms ease;
-        border-radius: var(--radius);
-        text-decoration: none;
-    }
-
-    /* Sizes */
-    .btn-sm {
-        padding: 7px 14px;
-        font-size: 12px;
-        min-height: 32px;
-    }
-    .btn-md {
-        padding: 10px 22px;
-        font-size: 13px;
-        min-height: 40px;
-    }
-    .btn-lg {
-        padding: 13px 28px;
-        font-size: 15px;
-        min-height: 46px;
-    }
-
-    /* Icon size override */
-    .btn-icon {
-        width: 40px;
-        height: 40px;
-        padding: 0;
-        min-height: auto;
-    }
-    .btn.btn-icon.btn-sm {
-        width: 32px;
-        height: 32px;
-    }
-    .btn.btn-icon.btn-lg {
-        width: 46px;
-        height: 46px;
-    }
-
-    /* Primary */
-    .btn-primary {
-        background: var(--accent);
-        color: var(--text-inverse);
-    }
-    .btn-primary:hover:not(:disabled) {
-        background: var(--accent-hover);
-        transform: translateY(-1px);
-        box-shadow: 0 4px 16px var(--accent-glow-strong);
-    }
-    .btn-primary:active:not(:disabled) {
-        transform: translateY(0);
-    }
-    .btn-primary:disabled {
-        opacity: 0.4;
-        cursor: not-allowed;
-        transform: none;
-        box-shadow: none;
-    }
-
-    /* Secondary */
-    .btn-secondary {
-        background: var(--surface-3);
-        color: var(--text-primary);
-    }
-    .btn-secondary:hover:not(:disabled) {
-        background: var(--surface-4);
-    }
-
-    /* Ghost */
-    .btn-ghost {
-        background: transparent;
-        color: var(--text-secondary);
-        border: 1px solid var(--border-medium);
-    }
-    .btn-ghost:hover:not(:disabled) {
-        background: var(--surface-2);
-        color: var(--text-primary);
-        border-color: var(--border-strong);
-    }
-
-    /* Danger */
-    .btn-danger {
-        background: var(--error);
-        color: #fff;
-    }
-    .btn-danger:hover:not(:disabled) {
-        background: hsl(0 84% 50%); /* slightly darker red */
-    }
-
-    /* Icon */
-    .btn-icon {
-        background: transparent;
-        color: var(--text-secondary);
-    }
-    .btn-icon:hover:not(:disabled) {
-        background: var(--surface-2);
-        color: var(--text-primary);
-    }
-
-    /* Theme: Sumi Overrides */
-    :global([data-theme="sumi"]) .btn:not(.btn-icon) {
-        font-size: 11px;
-        font-weight: 700;
-        letter-spacing: 0.12em;
-        text-transform: uppercase;
-    }
-</style>

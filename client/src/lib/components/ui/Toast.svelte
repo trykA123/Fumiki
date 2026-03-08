@@ -20,64 +20,24 @@
     }
 </script>
 
-<div class="toast toast-{intent} {className}" role="alert">
+<div
+    class={`inline-flex items-center justify-between gap-3 px-5 py-3 bg-surface-2 border border-border-medium border-l-[3px] rounded-[var(--radius)] shadow-[0_8px_24px_var(--shadow-color)] text-[var(--body-sm-size)] text-text-primary max-w-[380px] ${
+        intent === "success"
+            ? "!border-l-[var(--success)]"
+            : intent === "error"
+              ? "!border-l-[var(--error)]"
+              : intent === "warning"
+                ? "!border-l-[var(--warning)]"
+                : intent === "info"
+                  ? "!border-l-[#3b82f6]"
+                  : ""
+    } ${className}`}
+    role="alert"
+>
     <span>{message}</span>
-    <button onclick={dismiss} class="close-btn" aria-label="Close message"
-        >×</button
+    <button
+        onclick={dismiss}
+        class="bg-transparent border-none text-text-muted text-[16px] cursor-pointer leading-none p-0 transition-colors duration-200 hover:text-text-primary"
+        aria-label="Close message">×</button
     >
 </div>
-
-<style>
-    .toast {
-        display: inline-flex;
-        align-items: center;
-        justify-content: space-between;
-        gap: var(--space-3);
-        padding: var(--space-3) var(--space-5);
-        background: var(--surface-2);
-        border: 1px solid var(--border-medium);
-        border-radius: var(--radius);
-        box-shadow: 0 8px 24px var(--shadow-color);
-        font-size: var(--body-sm-size);
-        color: var(--text-primary);
-        max-width: 380px;
-        animation: slideIn 300ms cubic-bezier(0.16, 1, 0.3, 1) forwards;
-    }
-
-    .toast-success {
-        border-left: 3px solid var(--success);
-    }
-    .toast-error {
-        border-left: 3px solid var(--error);
-    }
-    .toast-warning {
-        border-left: 3px solid var(--warning);
-    }
-    .toast-info {
-        border-left: 3px solid var(--info, #3b82f6);
-    }
-
-    .close-btn {
-        background: transparent;
-        border: none;
-        color: var(--text-muted);
-        font-size: 16px;
-        cursor: pointer;
-        line-height: 1;
-        padding: 0;
-    }
-    .close-btn:hover {
-        color: var(--text-primary);
-    }
-
-    @keyframes slideIn {
-        from {
-            opacity: 0;
-            transform: translateY(10px);
-        }
-        to {
-            opacity: 1;
-            transform: translateY(0);
-        }
-    }
-</style>

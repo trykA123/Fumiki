@@ -13,6 +13,8 @@ import { sessionMiddleware, type Env } from './middleware/session';
 // Routers
 import { authRoutes } from './routes/auth';
 import { absRoutes } from './routes/abs';
+import { notesRoutes } from './routes/notes';
+import { summaryRoutes } from './routes/summaries';
 
 // Initialize Database on Boot
 console.log('--- Starting Fumiki Sidecar ---')
@@ -25,6 +27,14 @@ if (process.env.ABS_URL) {
         .run('ABS_URL', process.env.ABS_URL.replace(/\/$/, ''));
 }
 
+if (process.env.ABS_TOKEN) {
+    db.query(`
+        INSERT INTO connections (id, abs_user_id, username, token, is_admin)
+        VALUES ('env-override', 'api-user', 'api-user', ?, 1)
+        ON CONFLICT(abs_user_id) DO UPDATE SET token=excluded.token
+    `).run(process.env.ABS_TOKEN);
+}
+
 // Setup Hono Application
 const app = new Hono<Env>();
 app.use('*', logger());
@@ -33,6 +43,9 @@ app.use('/api/*', sessionMiddleware);
 // API Routes
 app.route('/api/auth', authRoutes);
 app.route('/api/abs', absRoutes);
+app.route('/api/notes', notesRoutes);
+app.route('/api/summaries', summaryRoutes);
+
 app.get('/api/health', (c) => {
     return c.json({ data: { status: 'ok' } });
 });
